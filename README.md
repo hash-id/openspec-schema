@@ -7,10 +7,11 @@ Custom [OpenSpec](https://github.com/Fission-AI/OpenSpec) workflow schemas by @h
 Spec-Driven Development workflow:
 
 - `discovery` interview phase before `proposal`.
-- `apply` runs as strict TDD: red-green-refactor, one task at a time.
+- `align` reviews all artifacts for consistency (a loop of up to 3 passes) before `apply`.
+- `apply` runs as strict TDD (red-green-refactor, one task at a time), then reviews the implemented code against the specs in the same phase (a loop of up to 3 passes), printing findings to screen.
 
 ```
-discovery -> proposal -> { specs, design } -> tasks -> apply (TDD)
+discovery -> proposal -> { specs, design } -> tasks -> align -> apply (TDD + review)
 ```
 
 Other schemas in this repo: `spec-driven` (the OpenSpec default).
@@ -36,6 +37,7 @@ No parameters. Local only (no global/user dir). Re-run to update.
 ```bash
 openspec new change <name>          # uses hash as default
 openspec instructions discovery --change <name>
+openspec instructions align   --change <name>
 openspec instructions apply   --change <name>
 ```
 
