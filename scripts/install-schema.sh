@@ -35,13 +35,18 @@ if [ ! -f "$SRC/schema.yaml" ]; then
   exit 1
 fi
 
-mkdir -p "$(dirname "$DEST")"
 rm -rf "$DEST"
-cp -R "$SRC" "$DEST"
+mkdir -p "$DEST/templates"
+cp "$SRC/schema.yaml" "$DEST/schema.yaml"
+shopt -s nullglob
+for f in "$SRC"/templates/*; do
+  [ -f "$f" ] && cp "$f" "$DEST/templates/"
+done
+shopt -u nullglob
 
 mkdir -p "$(dirname "$CONFIG")"
 if [ -f "$CONFIG" ]; then
-  grep -vE '^[[:space:]]*schema:' "$CONFIG" > "${CONFIG}.tmp" || true
+  grep -vE '^schema:' "$CONFIG" > "${CONFIG}.tmp" || true
 else
   : > "${CONFIG}.tmp"
 fi
