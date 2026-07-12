@@ -1,5 +1,5 @@
 name: hash
-version: 1
+version: 2
 description: Spec-Driven Development - discovery before proposal, TDD red-green-refactor on apply
 artifacts:
   - id: discovery
@@ -14,6 +14,7 @@ artifacts:
       - For every question, give your recommended answer first, so the user can confirm or adjust instead of answering from a blank page.
       - If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking.
       - Keep interviewing until the problem, desired outcomes, scope, and key decisions are understood. The problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
+      - Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. Do not infer confirmation from silence or from answering the last question alone.
 
       Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md.
     requires: []
@@ -178,8 +179,9 @@ artifacts:
          - specs <-> design: design explains how each requirement is met and contradicts none of them.
          - specs -> tasks: every requirement and scenario is covered by at least one task; no task is out of scope.
          - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST.
+         - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. Where a claim doesn't hold, surface the contradiction rather than silently trusting the artifact.
       3. Classify every finding by severity:
-         - HIGH: a contradiction between artifacts; a capability with no spec (or a spec with no capability); a requirement with no covering task; a structural error that breaks OpenSpec parsing; a Desired Outcome traceable to nothing.
+         - HIGH: a contradiction between artifacts; a capability with no spec (or a spec with no capability); a requirement with no covering task; a structural error that breaks OpenSpec parsing; a Desired Outcome traceable to nothing; a design/tasks claim about the codebase (a referenced function, module, file, or API) that doesn't match reality.
          - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed.
          - LOW: terminology drift, wording, formatting, ordering, or minor omissions.
       4. Tag each finding MECHANICAL or DECISION:
@@ -203,12 +205,14 @@ apply:
     Two phases: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
 
     PHASE 1 - IMPLEMENT (strict TDD, red-green-refactor, ONE task at a time):
+    Before writing any test for a task, identify the seam under test - the public interface where behavior will be observed - and confirm it matches the design (design.md, if present) and the task's intent. Prefer existing seams over new ones; the fewer seams, the better.
     For each pending checkbox task:
-    1. RED - derive the ONE behavior it delivers and write a failing unit test for it. Run it; it must fail for the right reason.
+    1. RED - derive the ONE behavior it delivers and write a failing unit test for it at the agreed seam. Run it; it must fail for the right reason.
     2. GREEN - write the minimal code through the public interface to make it pass. Run the test.
     3. REFACTOR - only while GREEN. Remove duplication, deepen modules, run tests after each change.
     Then tick the checkbox to [x] and move to the next task.
-    Rules: one test at a time, only enough code to pass the current test, never refactor while RED, tests must use public interfaces and survive refactors.
+    Rules: one test at a time, only enough code to pass the current test, never refactor while RED, tests must use public interfaces and survive refactors, never test at an unconfirmed seam.
+    Anti-patterns to avoid: implementation-coupled tests (mocking internals, testing private methods, or asserting via a side channel instead of the interface); tautological tests (the assertion recomputes the expected value the same way the code does, so it can't disagree with the code - expected values must come from an independent source of truth); horizontal slicing (writing all tests before all implementation) - work in vertical slices, one test then its minimal implementation, each cycle informed by the last.
     Context files (discovery.md, proposal.md, specs, design.md) are provided - read them as needed. Pause on blockers or when a test keeps failing.
 
     PHASE 2 - REVIEW (only once every task is [x]):
@@ -221,10 +225,23 @@ apply:
        - The code honours the decisions in design.md; no undocumented deviation.
        - Every task is genuinely done, not just checkbox-ticked.
        - No scope drift: nothing built beyond the specs and the proposal.
+       - Code quality against the smell baseline below - independent of spec compliance, a repo-documented standard (CONTRIBUTING.md, CODING_STANDARDS.md, etc., if present) always overrides it, and each smell is a judgement call, not a hard violation:
+         - Mysterious Name: a name that doesn't reveal what it does or holds -> rename it.
+         - Duplicated Code: same logic shape repeated -> extract and share it.
+         - Feature Envy: a function reaching into another module's data more than its own -> move it there.
+         - Data Clumps: the same fields/params keep travelling together -> bundle into one type.
+         - Primitive Obsession: a primitive standing in for a domain concept -> give it its own type.
+         - Repeated Switches: the same conditional on the same type recurs -> replace with polymorphism or a shared map.
+         - Shotgun Surgery: one logical change forces scattered edits -> gather what changes together.
+         - Divergent Change: one module edited for several unrelated reasons -> split by reason.
+         - Speculative Generality: abstraction or hooks added for needs the spec doesn't have -> delete it.
+         - Message Chains: long `a.b().c().d()` navigation -> hide behind one method.
+         - Middle Man: a module that mostly just delegates onward -> cut it, call the real target directly.
+         - Refused Bequest: a subclass/implementer ignoring most of what it inherits -> drop the inheritance, use composition.
     3. Classify every finding by severity:
        - HIGH: a requirement or scenario not implemented; a missing or failing test for a scenario; behaviour that contradicts a spec or a design decision; a task ticked but not actually done.
-       - MEDIUM: partial implementation; a scenario with weak or indirect test coverage; a design decision only partly honoured; duplication or a leaky interface worth fixing.
-       - LOW: naming, comments, formatting, minor cleanups.
+       - MEDIUM: partial implementation; a scenario with weak or indirect test coverage; a design decision only partly honoured; duplication or a leaky interface worth fixing; a clear instance of a smell-baseline item above.
+       - LOW: naming, comments, formatting, minor cleanups; a borderline or minor smell-baseline judgement call.
     4. Tag each finding MECHANICAL (exactly one correct fix - e.g. a missing assertion, an obvious edge-case test, a rename, formatting) or DECISION (more than one valid resolution, or it touches scope or behaviour - e.g. a requirement implemented differently than specified, a deliberate design deviation, a scenario whose intent is ambiguous).
     5. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
     6. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
