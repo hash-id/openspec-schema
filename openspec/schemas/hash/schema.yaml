@@ -172,7 +172,7 @@ artifacts:
 
       Each pass:
       1. Re-read all artifacts: discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md. Also run `openspec validate --strict` for deterministic structural checks.
-      2. Check consistency across the whole chain:
+      2. Build a consistency map: for each dimension below, list what you checked and what you found - BEFORE moving to classification.
          - discovery -> proposal: every Key Decision and Desired Outcome is honoured; the proposal never contradicts discovery.
          - proposal -> specs: every New/Modified Capability has a spec file; no spec covers a capability absent from the proposal.
          - proposal <-> design: design stays within proposal scope and introduces no capability the proposal omits.
@@ -180,18 +180,19 @@ artifacts:
          - specs -> tasks: every requirement and scenario is covered by at least one task; no task is out of scope.
          - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST.
          - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. Where a claim doesn't hold, surface the contradiction rather than silently trusting the artifact.
-      3. Classify every finding by severity:
+      3. STOP. Do not classify yet. Confirm the consistency map above is complete for all 7 dimensions before proceeding.
+      4. Classify every finding in the map by severity:
          - HIGH: a contradiction between artifacts; a capability with no spec (or a spec with no capability); a requirement with no covering task; a structural error that breaks OpenSpec parsing; a Desired Outcome traceable to nothing; a design/tasks claim about the codebase (a referenced function, module, file, or API) that doesn't match reality.
          - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed.
          - LOW: terminology drift, wording, formatting, ordering, or minor omissions.
-      4. Tag each finding MECHANICAL or DECISION:
+      5. Tag every classified finding MECHANICAL or DECISION:
          - MECHANICAL: exactly one correct fix, no scope or intent judgement (e.g. hashtag count, checkbox format, a kebab-case name mismatch, terminology unification, an obvious missing-scenario stub, task reordering).
          - DECISION: more than one valid resolution, or it touches scope or intent (e.g. a capability-vs-spec mismatch, a requirement-vs-task gap, a design-vs-spec contradiction, an uncovered outcome, a vague requirement needing a specific normative choice).
-      5. Show this pass's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
-      6. Resolve them:
+      6. Show this pass's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
+      7. Resolve them:
          - MECHANICAL findings: fix directly and record what changed.
          - DECISION findings: do NOT edit silently. Surface them to the user ONE at a time, your recommended resolution first (grounded in discovery.md as the source of intent), and apply only what the user confirms or adjusts.
-      7. Append this pass to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made.
+      8. Append this pass to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made.
 
       Stop when a pass finds no HIGH and no MEDIUM issues, or after the 3rd pass. If any HIGH issue remains unresolved when the loop ends (e.g. the user deferred a decision), STOP - do NOT proceed to apply - and report the remaining HIGH issues to the user. Remaining MEDIUM and LOW issues are logged in align.md as known issues and do not block.
     requires:
@@ -207,12 +208,12 @@ apply:
     PHASE 1 - IMPLEMENT (strict TDD, red-green-refactor, ONE task at a time):
     Before writing any test for a task, identify the seam under test - the public interface where behavior will be observed - and confirm it matches the design (design.md, if present) and the task's intent. Prefer existing seams over new ones; the fewer seams, the better.
     For each pending checkbox task:
-    1. RED - derive the ONE behavior it delivers and write a failing unit test for it at the agreed seam. Run it; it must fail for the right reason.
+    1. RED - derive the ONE behavior it delivers and write a failing unit test for it at the agreed seam. Run it; it MUST fail for the right reason.
     2. GREEN - write the minimal code through the public interface to make it pass. Run the test.
     3. REFACTOR - only while GREEN. Remove duplication, deepen modules, run tests after each change.
     Then tick the checkbox to [x] and move to the next task.
-    Rules: one test at a time, only enough code to pass the current test, never refactor while RED, tests must use public interfaces and survive refactors, never test at an unconfirmed seam.
-    Anti-patterns to avoid: implementation-coupled tests (mocking internals, testing private methods, or asserting via a side channel instead of the interface); tautological tests (the assertion recomputes the expected value the same way the code does, so it can't disagree with the code - expected values must come from an independent source of truth); horizontal slicing (writing all tests before all implementation) - work in vertical slices, one test then its minimal implementation, each cycle informed by the last.
+    Rules: one test at a time, only enough code to pass the current test, never refactor while RED, tests MUST use public interfaces and survive refactors, never test at an unconfirmed seam.
+    Anti-patterns to avoid: implementation-coupled tests (mocking internals, testing private methods, or asserting via a side channel instead of the interface); tautological tests (the assertion recomputes the expected value the same way the code does, so it can't disagree with the code - expected values MUST come from an independent source of truth); horizontal slicing (writing all tests before all implementation) - work in vertical slices, one test then its minimal implementation, each cycle informed by the last.
     Context files (discovery.md, proposal.md, specs, design.md) are provided - read them as needed. Pause on blockers or when a test keeps failing.
 
     PHASE 2 - REVIEW (only once every task is [x]):
@@ -220,7 +221,7 @@ apply:
     Run each pass in a fresh agent session (subagent) with no memory of the implementer or prior passes, it sees only the artifacts on disk (specs/**/*.md, design.md, tasks.md, code, test results). 
     Each pass:
     1. Re-read specs/**/*.md, design.md, tasks.md and the code produced; run the full test suite and any linters. This is the deterministic gate: any failing test or lint error is an automatic HIGH finding, independent of the subagent's own judgement.
-    2. Check the code against the contract:
+    2. Build a contract map: for each item below, list what you checked and what you found - BEFORE moving to classification.
        - Every requirement and every #### Scenario in specs is actually implemented AND exercised by a passing test.
        - The code honours the decisions in design.md; no undocumented deviation.
        - Every task is genuinely done, not just checkbox-ticked.
@@ -238,15 +239,16 @@ apply:
          - Message Chains: long `a.b().c().d()` navigation -> hide behind one method.
          - Middle Man: a module that mostly just delegates onward -> cut it, call the real target directly.
          - Refused Bequest: a subclass/implementer ignoring most of what it inherits -> drop the inheritance, use composition.
-    3. Classify every finding by severity:
+    3. STOP. Do not classify yet. Confirm the contract map above is complete - every requirement, scenario, task, and smell-baseline item checked - before proceeding.
+    4. Classify every finding in the map by severity:
        - HIGH: a requirement or scenario not implemented; a missing or failing test for a scenario; behaviour that contradicts a spec or a design decision; a task ticked but not actually done.
        - MEDIUM: partial implementation; a scenario with weak or indirect test coverage; a design decision only partly honoured; duplication or a leaky interface worth fixing; a clear instance of a smell-baseline item above.
        - LOW: naming, comments, formatting, minor cleanups; a borderline or minor smell-baseline judgement call.
-    4. Tag each finding MECHANICAL (exactly one correct fix - e.g. a missing assertion, an obvious edge-case test, a rename, formatting) or DECISION (more than one valid resolution, or it touches scope or behaviour - e.g. a requirement implemented differently than specified, a deliberate design deviation, a scenario whose intent is ambiguous).
-    5. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
-    6. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
+    5. Tag every classified finding MECHANICAL (exactly one correct fix - e.g. a missing assertion, an obvious edge-case test, a rename, formatting) or DECISION (more than one valid resolution, or it touches scope or behaviour - e.g. a requirement implemented differently than specified, a deliberate design deviation, a scenario whose intent is ambiguous).
+    6. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
+    7. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
        - MECHANICAL findings: fix the code or tests directly.
        - DECISION findings: do NOT change behaviour silently. Surface each to the user ONE at a time, your recommended resolution first (grounded in specs and design.md), and apply only what the user confirms or adjusts.
-    Fixes from step 6 land before the next pass starts, so the next fresh session reviews the updated code.
+    Fixes from step 7 land before the next pass starts, so the next fresh session reviews the updated code.
 
     Stop when a pass finds no HIGH and no MEDIUM issues, or after the 3rd pass. The loop MUST NOT stop while the test suite or linters are failing, regardless of the subagent's HIGH/MEDIUM/LOW classification - a failing run is always a blocking HIGH. If any HIGH issue is still unresolved when the loop ends, STOP and mark the change as a RELEASE BLOCKER: report the remaining HIGH issues on screen and tell the user NOT to archive the change until they are resolved. Remaining MEDIUM and LOW issues are shown on screen as known issues.
