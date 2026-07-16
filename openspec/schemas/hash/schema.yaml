@@ -9,7 +9,7 @@ artifacts:
     instruction: |
       Produce discovery.md through a relentless interview - do NOT write it first.
 
-      MUST use the `grill-me` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking - prefer, in order: codebase-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools.
+      MUST use the `grill-me` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking - prefer, in order: codebase-memory-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools.
 
       discovery.md has a scope grill-me doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
 
@@ -34,7 +34,7 @@ artifacts:
       - **Impact**: Affected code, APIs, dependencies, or systems.
 
       IMPORTANT: The Capabilities section is critical. It creates the contract between proposal and specs phases.
-      Research existing specs before filling this in - prefer, in order: codebase-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools. Each capability listed here will need a corresponding spec file.
+      Research existing specs before filling this in - prefer, in order: codebase-memory-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools. Each capability listed here will need a corresponding spec file.
 
       Keep it concise (1-2 pages). Focus on the "why" not the "how", implementation details belong in design.md.
       This is the foundation - specs, design, and tasks all build on this. Because nothing else exists yet to check it against, MUST use the `hrt-adversarial-authoring` skill (artifact: proposal) to draft and adversarially review it before finalizing.
@@ -185,7 +185,7 @@ apply:
     PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time):
     MUST use the `tdd` skill for seam confirmation, the RED/GREEN loop, and the anti-patterns to avoid (implementation-coupled tests, tautological tests, horizontal slicing). For each pending checkbox task, follow the skill's loop, then tick the checkbox to [x] and move to the next task.
     Override: unlike the `tdd` skill's default (which defers refactoring to the `code-review` review stage), REFACTOR stays inside this loop as step 3 (only while GREEN, never while RED) - tick the checkbox only after it.
-    Context files (discovery.md, proposal.md, specs, design.md) are provided - read them as needed. For any other codebase exploration, prefer, in order: codebase-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools. Pause on blockers or when a test keeps failing.
+    Context files (discovery.md, proposal.md, specs, design.md) are provided - read them as needed. For any other codebase exploration, prefer, in order: codebase-memory-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools. Pause on blockers or when a test keeps failing.
 
     PHASE 2 - REVIEW (only once every task is [x]):
     MUST use the `hrt-apply-code-review` skill to review the implemented code against specs/**/*.md, design.md, and tasks.md, resolving findings before the change is considered done.
