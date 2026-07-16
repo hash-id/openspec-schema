@@ -49,15 +49,15 @@ done
 shopt -u nullglob
 
 echo "Installing skills..."
-npx --yes skills@latest add mattpocock/skills --skill grill-me tdd || {
+npx --yes skills@latest add mattpocock/skills --skill grill-me tdd --agent '*' -y < /dev/null || {
   echo "Error: failed to install grill-me/tdd from mattpocock/skills" >&2
   exit 1
 }
-npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction || {
+npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction --agent '*' -y < /dev/null || {
   echo "Error: failed to install security skills from wshobson/agents" >&2
   exit 1
 }
-npx --yes skills@latest add "${REPO}/skills" || {
+npx --yes skills@latest add "${REPO}/skills" --agent '*' -y < /dev/null || {
   echo "Error: failed to install hrt-* skills from ${REPO}/skills" >&2
   exit 1
 }
