@@ -168,7 +168,7 @@ artifacts:
 
   - id: align
     generates: align.md
-    description: Cross-artifact alignment review - a loop that checks every artifact is consistent with the others and faithful to the requirements, resolving the issues before apply
+    description: Cross-artifact alignment review - a loop that checks every artifact is consistent with the others and faithful to the requirements, resolving the issues, then a mandatory human walkthrough of every artifact before apply
     template: align.md
     instruction: |
       MUST use the `hrt-align-consistency-review` skill to verify that every artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and to write the findings into align.md.

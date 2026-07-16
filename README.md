@@ -7,7 +7,7 @@ Custom [OpenSpec](https://github.com/Fission-AI/OpenSpec) workflow schemas by @h
 Spec-Driven Development workflow:
 
 - `discovery` interview phase before `proposal`.
-- `align` reviews all artifacts for consistency (a loop of up to 3 passes) before `apply`.
+- `align` alternates automated consistency checks with a human walkthrough of every artifact, uncapped, until a walkthrough round raises nothing new or the human explicitly signs off, before `apply`.
 - `apply` runs as strict TDD (red-green-refactor, one task at a time), then reviews the implemented code against the specs in the same phase (a loop of up to 3 passes), printing findings to screen.
 
 ```
