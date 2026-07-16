@@ -10,6 +10,10 @@ command -v git >/dev/null 2>&1 || {
   echo "Error: git is required." >&2
   exit 1
 }
+command -v npx >/dev/null 2>&1 || {
+  echo "Error: npx (Node.js) is required." >&2
+  exit 1
+}
 
 DEST="$(pwd)/openspec/schemas/${SCHEMA_NAME}"
 CONFIG="$(pwd)/openspec/config.yaml"
@@ -44,6 +48,20 @@ for f in "$SRC"/templates/*; do
 done
 shopt -u nullglob
 
+echo "Installing skills..."
+npx --yes skills@latest add mattpocock/skills --skill grill-me tdd || {
+  echo "Error: failed to install grill-me/tdd from mattpocock/skills" >&2
+  exit 1
+}
+npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction || {
+  echo "Error: failed to install security skills from wshobson/agents" >&2
+  exit 1
+}
+npx --yes skills@latest add "${REPO}/skills" || {
+  echo "Error: failed to install hrt-* skills from ${REPO}/skills" >&2
+  exit 1
+}
+
 mkdir -p "$(dirname "$CONFIG")"
 if [ -f "$CONFIG" ]; then
   grep -vE '^schema:' "$CONFIG" > "${CONFIG}.tmp" || true
@@ -54,5 +72,6 @@ printf 'schema: %s\n' "$SCHEMA_NAME" >> "${CONFIG}.tmp"
 mv "${CONFIG}.tmp" "$CONFIG"
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
+echo "Installed skills -> .agents/skills/ (grill-me, tdd, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

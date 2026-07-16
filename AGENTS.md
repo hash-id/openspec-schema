@@ -10,6 +10,12 @@ Everything lives in `artifacts[]` (`id`, `generates`, `template`, `instruction`,
 
 `requires` is the dependency graph that gates phase order — keep it accurate. If an instruction references a template section, update `templates/<id>.md` to match.
 
+Several instructions are thin pointers to skills instead of inlined prompt text — `discovery`→`grill-me`, `align`→`hrt-align-consistency-review`, `apply` Phase 1→`tdd`, `apply` Phase 2→`hrt-apply-code-review`, `proposal`/`specs`→`hrt-adversarial-authoring`, plus conditional pointers from `design`/`specs` to the security skills (`stride-analysis-patterns`, `threat-mitigation-mapping`, `security-requirement-extraction`). The three `hrt-*` skills are this repo's own, at `skills/<name>/SKILL.md`, self-contained and independent of any one schema. The rest are external (`mattpocock/skills`, `wshobson/agents`), provisioned by the installer — see `docs/research/2026-07-16-skills-as-dependencies-plan.md` for why each was inlined, split, or referenced externally.
+
+## Skills
+
+Local skills live at `skills/<name>/SKILL.md` (repo root, not under `openspec/schemas/hash/`) so other schemas here (`spec-driven`) can reuse them. Frontmatter is just `name` + `description` (the format `vercel-labs/skills` and Claude Code both expect) — no repo-specific extensions.
+
 ## Templates
 
 Markdown skeletons, not filled-in examples. Keep placeholders as HTML comments, e.g. `<!-- Task description -->`.
@@ -18,7 +24,7 @@ Markdown skeletons, not filled-in examples. Keep placeholders as HTML comments, 
 
 No flags, on purpose (see README). Don't add any unless asked.
 
-It clones `master` into a temp dir, copies only `schema.yaml` and `templates/*`, then rewrites the `schema:` line in `./openspec/config.yaml`. It never `cp -r`s the whole clone — keep it that way. Test it in a scratch dir, since it writes to `./openspec/` relative to wherever it's run.
+It clones `master` into a temp dir, copies only `schema.yaml` and `templates/*`, then provisions skills via `npx skills add` (external: `mattpocock/skills`, `wshobson/agents`; local: this repo's own `skills/`), then rewrites the `schema:` line in `./openspec/config.yaml`. It never `cp -r`s the whole clone for the schema.yaml/templates step — keep it that way; the `npx skills add` calls do their own independent clone and aren't part of that invariant. A failed skill install stops the installer (same as a failed schema clone) — skills aren't optional for a schema whose instructions point at them. Test it in a scratch dir, since it writes to `./openspec/` (and `.agents/skills/`) relative to wherever it's run.
 
 ## Validating changes
 

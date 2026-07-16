@@ -18,7 +18,7 @@ Other schemas in this repo: `spec-driven` (the OpenSpec default).
 
 ## Install (local, into the current repo)
 
-Installs `hash` into `./openspec/schemas/hash` and sets it as the repo's default schema (`openspec/config.yaml`):
+Installs `hash` into `./openspec/schemas/hash`, provisions the skills its instructions point to (via `npx skills add`), and sets it as the repo's default schema (`openspec/config.yaml`):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.sh | bash
@@ -46,7 +46,8 @@ openspec instructions apply   --change <name>
 ```
 openspec/schemas/hash/schema.yaml   workflow definition (artifacts, deps, apply)
 openspec/schemas/hash/templates/    artifact templates
+skills/                             local hrt-* skills referenced from schema.yaml
 scripts/install-schema.sh           local installer (no params)
 ```
 
-Requires: the OpenSpec CLI (`@fission-ai/openspec`) and `git`.
+Requires: the OpenSpec CLI (`@fission-ai/openspec`), `git`, and Node.js/`npx`.
