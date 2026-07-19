@@ -1,5 +1,5 @@
 name: hash
-version: 3
+version: 4
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -127,6 +127,8 @@ artifacts:
       Good design docs explain the "why" behind technical decisions.
 
       Security pass (feeds Risks / Trade-offs): MUST check whether the change touches a trust boundary - new or modified authentication/authorization, external/untrusted input, data exposure or storage, third-party integration, or privilege changes. If none apply, MUST skip the security pass and MAY note the skip in one line; fill Risks / Trade-offs from ordinary (non-security) risk if relevant. If any apply, MUST use the `stride-analysis-patterns` skill for threat identification, then MUST use the `threat-mitigation-mapping` skill to map each identified threat to a mitigation, feeding Risks / Trade-offs as [Threat] → Mitigation entries.
+
+      MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing, folding in any security pass above as part of the Risks / Trade-offs content the draft subagent produces - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal.
     requires:
       - proposal
       - specs
