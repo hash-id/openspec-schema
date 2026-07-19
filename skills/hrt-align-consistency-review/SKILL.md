@@ -17,7 +17,8 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **WALKT
    - proposal -> specs: every New/Modified Capability has a spec file; no spec covers a capability absent from the proposal.
    - proposal <-> design: design stays within proposal scope and introduces no capability the proposal omits.
    - specs <-> design: design explains how each requirement is met and contradicts none of them.
-   - specs -> tasks: every requirement and scenario is covered by at least one task; no task is out of scope.
+   - specs -> tasks: every requirement and scenario (including negative/edge-case scenarios) is covered by at least one task; no task is out of scope.
+   - design -> tasks (when design.md exists and has a security pass): every `[Threat] → Mitigation` entry in Risks/Trade-offs has at least one corresponding negative-test task; a threat with no covering task is a HIGH finding under the existing severity rubric, same tier as "a requirement with no covering task."
    - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST.
    - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. Where a claim doesn't hold, surface the contradiction rather than silently trusting the artifact. Prefer, in order: codebase-memory-mcp (if available) > ripgrep (`rg`) > built-in grep/glob tools.
    - On cycle 2+: also fold in whatever the prior WALKTHROUGH round raised — treat each as its own item in the map, not a footnote.

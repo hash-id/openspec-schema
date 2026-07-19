@@ -28,6 +28,7 @@ Review the implemented code against the specs in a loop of at most 3 passes, sto
      - Message Chains: long `a.b().c().d()` navigation -> hide behind one method.
      - Middle Man: a module that mostly just delegates onward -> cut it, call the real target directly.
      - Refused Bequest: a subclass/implementer ignoring most of what it inherits -> drop the inheritance, use composition.
+     - Weak/tautological oracle: an assertion that recomputes the implementation's own logic, mirrors current behavior without an independent expected value, or would still pass if the THEN criteria were violated -> rewrite against an independent source of truth (a literal, a worked example, the spec's stated outcome).
 3. STOP. Do not classify yet. Confirm the contract map above is complete — every requirement, scenario, task, and smell-baseline item checked — before proceeding.
 4. Classify every finding in the map by severity:
    - HIGH: a requirement or scenario not implemented; a missing or failing test for a scenario; behaviour that contradicts a spec or a design decision; a task ticked but not actually done.

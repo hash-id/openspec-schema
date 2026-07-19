@@ -1,5 +1,5 @@
 name: hash
-version: 4
+version: 5
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -148,6 +148,8 @@ artifacts:
       - Each task MUST be a checkbox: `- [ ] X.Y Task description`
       - Tasks should be small enough to complete in one session
       - Order tasks by dependency (what must be done first?)
+
+      Where specs (`specs/**/*.md`) define WHEN/THEN scenarios covering both expected and failure behavior, and design.md's Risks/Trade-offs section defines `[Threat] → Mitigation` entries, each MUST trace to at least one task: a scenario or threat with no corresponding task is a coverage gap, not something for `tasks` to silently drop. Tasks tracing to a negative scenario or a threat mitigation SHOULD be tagged distinctly (e.g. a trailing `[negative]` / `[security]` marker) so `align` and the apply-phase review can check coverage without re-deriving it. Keep this lightweight - traceability existing is the MUST, not one-checkbox-per-scenario cardinality.
 
       Example:
       ```
