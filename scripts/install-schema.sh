@@ -49,8 +49,8 @@ done
 shopt -u nullglob
 
 echo "Installing skills..."
-npx --yes skills@latest add mattpocock/skills --skill grill-me tdd --agent '*' -y < /dev/null || {
-  echo "Error: failed to install grill-me/tdd from mattpocock/skills" >&2
+npx --yes skills@latest add mattpocock/skills --skill grill-me grilling tdd --agent '*' -y < /dev/null || {
+  echo "Error: failed to install grill-me/grilling/tdd from mattpocock/skills" >&2
   exit 1
 }
 npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction --agent '*' -y < /dev/null || {
@@ -72,6 +72,6 @@ printf 'schema: %s\n' "$SCHEMA_NAME" >> "${CONFIG}.tmp"
 mv "${CONFIG}.tmp" "$CONFIG"
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grill-me, tdd, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring)"
+echo "Installed skills -> .agents/skills/ (grill-me, grilling, tdd, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

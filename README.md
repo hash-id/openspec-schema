@@ -30,6 +30,18 @@ Or from a clone:
 ./scripts/install-schema.sh
 ```
 
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.ps1 | iex
+```
+
+Or from a clone:
+
+```powershell
+./scripts/install-schema.ps1
+```
+
 No parameters. Local only (no global/user dir). Re-run to update.
 
 ## Use
@@ -47,7 +59,8 @@ openspec instructions apply   --change <name>
 openspec/schemas/hash/schema.yaml   workflow definition (artifacts, deps, apply)
 openspec/schemas/hash/templates/    artifact templates
 skills/                             local hrt-* skills referenced from schema.yaml
-scripts/install-schema.sh           local installer (no params)
+scripts/install-schema.sh           local installer (no params, bash)
+scripts/install-schema.ps1          local installer (no params, PowerShell)
 ```
 
 Requires: the OpenSpec CLI (`@fission-ai/openspec`), `git`, and Node.js/`npx`.
