@@ -20,12 +20,17 @@
 #### LOW
 -
 
-### WALKTHROUGH
+### VERIFY
 
-<!-- One line per file, in build order: proposal.md -> each specs/**/*.md -> design.md -> tasks.md. Format: `<file> -> <user's answer, verbatim or summarized>`. "Nothing" is a valid answer but must be recorded per file - do not collapse multiple files into one line. -->
+<!-- Fresh-context re-check of this cycle's ALIGN map and fixes. One line: `<clean | finding>`. If VERIFY found something new, add it to the HIGH/MEDIUM/LOW lists above (tagged like any other finding) rather than a separate list here. -->
 -
 
-<!-- Add a `## Cycle N` block (ALIGN + WALKTHROUGH) for each cycle actually run. No cap - keep adding blocks as long as walkthrough feedback re-enters ALIGN. -->
+### WALKTHROUGH
+
+<!-- One entry for the round. Format: `Files: <proposal.md, each specs/**/*.md, design.md, tasks.md as listed> -> <user's answer, verbatim or summarized>`. "Nothing" is a valid answer. -->
+-
+
+<!-- Add a `## Cycle N` block (ALIGN + VERIFY + WALKTHROUGH) for each cycle actually run. No cap - keep adding blocks as long as walkthrough feedback re-enters ALIGN. -->
 
 ## Known Issues
 
