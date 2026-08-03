@@ -28,19 +28,19 @@ Review the implemented code against the specs in a loop of at most 3 passes, sto
      - Message Chains: long `a.b().c().d()` navigation -> hide behind one method.
      - Middle Man: a module that mostly just delegates onward -> cut it, call the real target directly.
      - Refused Bequest: a subclass/implementer ignoring most of what it inherits -> drop the inheritance, use composition.
-     - Weak/tautological oracle: an assertion that recomputes the implementation's own logic, mirrors current behavior without an independent expected value, or would still pass if the THEN criteria were violated -> rewrite against an independent source of truth (a literal, a worked example, the spec's stated outcome).
-3. STOP. Do not classify yet. Confirm the contract map above is complete — every requirement, scenario, task, and smell-baseline item checked — before proceeding.
-4. Classify every finding in the map by severity:
-   - HIGH: a requirement or scenario not implemented; a missing or failing test for a scenario; behaviour that contradicts a spec or a design decision; a task ticked but not actually done.
-   - MEDIUM: partial implementation; a scenario with weak or indirect test coverage; a design decision only partly honoured; duplication or a leaky interface worth fixing; a clear instance of a smell-baseline item above.
+3. Weak-oracle gate: for every test the contract map above credits as covering a requirement or scenario, ask "would this test still pass if the implementation under test were replaced with a stub, an emptied body, or a default return?" If yes, the oracle is tautological — it recomputes the implementation's own logic or mirrors current behaviour without an independent expected value. Rewrite it against an independent source of truth (a literal, a worked example, the spec's stated outcome) before counting the scenario as covered. This gate is mandatory whenever step 2 credits 5 or more tests, or any test for a specifically-described behaviour, as covering the contract map — not a discretionary smell judgement call.
+4. STOP. Do not classify yet. Confirm the contract map above is complete — every requirement, scenario, task, and the weak-oracle gate — before proceeding.
+5. Classify every finding in the map by severity:
+   - HIGH: a requirement or scenario not implemented; a missing or failing test for a scenario; behaviour that contradicts a spec or a design decision; a task ticked but not actually done; a tautological oracle caught by the weak-oracle gate for a scenario the spec treats as critical.
+   - MEDIUM: partial implementation; a scenario with weak or indirect test coverage; a design decision only partly honoured; duplication or a leaky interface worth fixing; a clear instance of a smell-baseline item above; a tautological oracle caught by the weak-oracle gate elsewhere.
    - LOW: naming, comments, formatting, minor cleanups; a borderline or minor smell-baseline judgement call.
-5. Tag every classified finding MECHANICAL (exactly one correct fix — e.g. a missing assertion, an obvious edge-case test, a rename, formatting) or DECISION (more than one valid resolution, or it touches scope or behaviour — e.g. a requirement implemented differently than specified, a deliberate design deviation, a scenario whose intent is ambiguous).
-6. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
-7. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
+6. Tag every classified finding MECHANICAL (exactly one correct fix — e.g. a missing assertion, an obvious edge-case test, a rename, formatting) or DECISION (more than one valid resolution, or it touches scope or behaviour — e.g. a requirement implemented differently than specified, a deliberate design deviation, a scenario whose intent is ambiguous).
+7. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
+8. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
    - MECHANICAL findings: fix the code or tests directly.
    - DECISION findings: do NOT change behaviour silently. Surface each to the user ONE at a time, your recommended resolution first (grounded in specs and design.md), and apply only what the user confirms or adjusts.
 
-Fixes from step 7 land before the next pass starts, so the next fresh session reviews the updated code.
+Fixes from step 8 land before the next pass starts, so the next fresh session reviews the updated code.
 
 ## Loop exit
 
