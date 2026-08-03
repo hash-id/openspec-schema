@@ -13,38 +13,39 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIF
 
 1. Re-read all artifacts: discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md. Also run `openspec validate --strict` for deterministic structural checks.
 2. Build a consistency map: for each dimension below, list what you checked and what you found — BEFORE moving to classification.
-   - discovery -> proposal: every Key Decision and Desired Outcome is honoured; the proposal never contradicts discovery.
-   - proposal -> specs: every New/Modified Capability has a spec file; no spec covers a capability absent from the proposal.
-   - proposal <-> design: design stays within proposal scope and introduces no capability the proposal omits.
-   - specs <-> design: design explains how each requirement is met and contradicts none of them.
-   - specs -> tasks: every requirement and scenario (including negative/edge-case scenarios) is covered by at least one task; no task is out of scope.
-   - design -> tasks (when design.md exists and has a security pass): every `[Threat] → Mitigation` entry in Risks/Trade-offs has at least one corresponding negative-test task; a threat with no covering task is a HIGH finding under the existing severity rubric, same tier as "a requirement with no covering task."
-   - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST.
-   - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. Where a claim doesn't hold, surface the contradiction rather than silently trusting the artifact. Prefer, in order: codegraph (if available) > codebase-memory-mcp (if available and codegraph is not) > ripgrep (`rg`, MUST use over built-in grep/glob tools).
+   - discovery -> proposal: every Key Decision and Desired Outcome is honoured; the proposal never contradicts discovery. LLM judgment only.
+   - proposal -> specs: every New/Modified Capability has a spec file; no spec covers a capability absent from the proposal. Grep/glob first (capability name -> `specs/<name>/spec.md` exists) - existence is a fact, not a judgment call.
+   - proposal <-> design: design stays within proposal scope and introduces no capability the proposal omits. LLM judgment only.
+   - specs <-> design: design explains how each requirement is met and contradicts none of them. LLM judgment only.
+   - specs -> tasks: every requirement and scenario (including negative/edge-case scenarios) is covered by at least one task; no task is out of scope. Grep tasks.md for a reference to each requirement/scenario first - zero mentions is a fact; judge adequacy of coverage only after that.
+   - design -> tasks (when design.md exists and has a security pass): every `[Threat] → Mitigation` entry in Risks/Trade-offs has at least one corresponding negative-test task. Grep tasks.md for each `[Threat] →` entry first - zero mentions is a HIGH finding, same as an uncovered requirement.
+   - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST. Fully mechanical - grep/regex, no judgment needed.
+   - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. MUST use a tool (codegraph > codebase-memory-mcp > ripgrep) for existence; judge only whether the artifact's characterization of that code is accurate.
    - On cycle 2+: also fold in whatever the prior WALKTHROUGH round raised — treat each as its own item in the map, not a footnote.
-3. STOP. Do not classify yet. Confirm the consistency map above is complete for all 7 dimensions (plus any carried-over walkthrough items) before proceeding.
-4. Classify every finding in the map by severity:
+3. Rule for all dimensions above: mechanize only the existence/reference/structural half (does X exist, is X referenced, is the format right), never the semantic half (does X actually fulfill the intent). A keyword match is not a substitute for that judgment.
+4. STOP. Do not classify yet. Confirm the consistency map above is complete for all 7 dimensions (plus any carried-over walkthrough items) before proceeding.
+5. Classify every finding in the map by severity:
    - HIGH: a contradiction between artifacts; a capability with no spec (or a spec with no capability); a requirement with no covering task; a structural error that breaks OpenSpec parsing; a Desired Outcome traceable to nothing; a design/tasks claim about the codebase (a referenced function, module, file, or API) that doesn't match reality.
    - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed.
    - LOW: terminology drift, wording, formatting, ordering, or minor omissions.
-5. Tag every classified finding MECHANICAL or DECISION:
+6. Tag every classified finding MECHANICAL or DECISION:
    - MECHANICAL: exactly one correct fix, no scope or intent judgement (e.g. hashtag count, checkbox format, a kebab-case name mismatch, terminology unification, an obvious missing-scenario stub, task reordering).
    - DECISION: more than one valid resolution, or it touches scope or intent (e.g. a capability-vs-spec mismatch, a requirement-vs-task gap, a design-vs-spec contradiction, an uncovered outcome, a vague requirement needing a specific normative choice).
-6. Show this cycle's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
-7. Resolve them:
+7. Show this cycle's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
+8. Resolve them:
    - MECHANICAL findings: fix directly and record what changed.
    - DECISION findings (this includes every HIGH that isn't a MECHANICAL fix): do NOT edit silently, and do NOT exit the skill to report them either. Surface each to the user ONE at a time: state the tradeoff neutrally first (what conflicts, and the valid resolution options), THEN your recommended resolution (grounded in discovery.md as the source of intent) — recommendation second, not first, so the user weighs the tradeoff before seeing your answer. Get an actual resolution or an explicit, reasoned defer from the user for each one — do not move on with a HIGH unaddressed.
-8. Append this cycle's ALIGN results to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made (including any explicit defer, with the user's stated reason).
-9. Every HIGH issue needs one of two outcomes before ALIGN is done: fixed (mechanically or via the user's chosen resolution), or explicitly ruled out of scope by the user with a recorded reason — that counts as resolved, not deferred. A bare "let's deal with it later" is not enough; keep step 7's resolution conversation open on that item until it lands on one of these two outcomes. Only once every HIGH from this cycle's map has one of them, proceed to VERIFY.
+9. Append this cycle's ALIGN results to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made (including any explicit defer, with the user's stated reason).
+10. Every HIGH issue needs one of two outcomes before ALIGN is done: fixed (mechanically or via the user's chosen resolution), or explicitly ruled out of scope by the user with a recorded reason — that counts as resolved, not deferred. A bare "let's deal with it later" is not enough; keep step 8's resolution conversation open on that item until it lands on one of these two outcomes. Only once every HIGH from this cycle's map has one of them, proceed to VERIFY.
 
 ## VERIFY
 
-Steps 1-9 run in the orchestrating session, which classifies its own findings and applies its own MECHANICAL fixes — nothing independent checks that work before it reaches the user. Close that gap with one fresh-context pass, not a second dual-lens review: adversarial authoring (used by `proposal`/`specs`/`design`) earns its two independent lenses because there's no ground truth yet to check a new draft against; ALIGN already has one — the artifacts checking each other — so a single independent re-check is enough.
+ALIGN classifies its own findings and applies its own MECHANICAL fixes with nothing independent checking that work. VERIFY closes that gap with one fresh-context re-check.
 
-1. Spawn a subagent with no memory of the ALIGN pass above: it receives only the artifacts as they now stand (post-fix) and this skill's ALIGN step 2 checklist. It does NOT receive the consistency map, findings, or resolutions step 1-8 produced.
+1. Spawn a subagent with no memory of the ALIGN pass above: it receives only the artifacts as they now stand (post-fix) and this skill's ALIGN step 2 checklist. It does NOT receive the consistency map, findings, or resolutions ALIGN produced.
 2. It re-derives its own consistency map against the same 7 dimensions (plus carried-over walkthrough items, if any) and reports back: any HIGH it finds that ALIGN's map missed, and any MECHANICAL fix ALIGN applied that it can verify is actually correct (fix matches what the artifact now needs) vs. still wrong or incomplete.
 3. If VERIFY finds nothing new: proceed to WALKTHROUGH.
-4. If VERIFY finds a HIGH ALIGN missed, or a MECHANICAL fix that didn't actually resolve the finding: fold it into this cycle's map (append to align.md same as any ALIGN finding), resolve it via step 7's rules (MECHANICAL fixed directly, DECISION surfaced to the user), then proceed to WALKTHROUGH — do not re-run VERIFY again within the same cycle; a second miss is caught by the next cycle's VERIFY if WALKTHROUGH reopens one.
+4. If VERIFY finds a HIGH ALIGN missed, or a MECHANICAL fix that didn't actually resolve the finding: fold it into this cycle's map (append to align.md same as any ALIGN finding), resolve it via ALIGN step 8's rules (MECHANICAL fixed directly, DECISION surfaced to the user), then proceed to WALKTHROUGH — do not re-run VERIFY again within the same cycle; a second miss is caught by the next cycle's VERIFY if WALKTHROUGH reopens one.
 5. If a subagent cannot be spawned in the current environment: state that VERIFY could not run and ask the user whether to proceed to WALKTHROUGH without it. Do not silently skip this step.
 
 ## WALKTHROUGH

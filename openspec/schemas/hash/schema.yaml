@@ -1,5 +1,5 @@
 name: hash
-version: 6
+version: 7
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -184,7 +184,11 @@ apply:
     - align
   tracks: tasks.md
   instruction: |
-    Two phases: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
+    MUST run in a fresh session, not a continuation of discovery-through-align - keeps planning noise out of the implementation context.
+
+    PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement.
+
+    Two phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
 
     PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time):
     MUST use the `tdd` skill for seam confirmation, the RED/GREEN loop, and the anti-patterns to avoid (implementation-coupled tests, tautological tests, horizontal slicing). For each pending checkbox task, follow the skill's loop, then tick the checkbox to [x] and move to the next task.
