@@ -1,4 +1,4 @@
-# openspec-schema
+# tempa-spec
 
 <p align="center">
   <strong>tempa-spec</strong> — a custom <a href="https://github.com/Fission-AI/OpenSpec">OpenSpec</a> schema for teams who don't take an agent's word that a phase is done.
@@ -46,25 +46,23 @@ Installs `tempa-spec` into `./openspec/schemas/tempa-spec`, provisions the skill
 curl -fsSL https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.sh | bash
 ```
 
-Or from a clone:
-
-```bash
-./scripts/install-schema.sh
-```
-
 Windows (PowerShell):
 
 ```powershell
 irm https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.ps1 | iex
 ```
 
-Or from a clone:
+Defaults to the latest git tag (stable release). Pass a tag/ref to pin a specific version:
 
-```powershell
-./scripts/install-schema.ps1
+```bash
+curl -fsSL https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.sh | bash -s -- 2026.7.6
 ```
 
-No parameters. Local only (no global/user dir). Re-run to update.
+```powershell
+$s = irm https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.ps1; & ([scriptblock]::Create($s)) 2026.7.6
+```
+
+Local only (no global/user dir). Re-run to update.
 
 ## Use
 
