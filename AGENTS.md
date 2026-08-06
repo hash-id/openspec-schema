@@ -16,7 +16,7 @@ Several instructions are thin pointers to skills instead of inlined prompt text 
 
 ## Skills
 
-Local skills live at `skills/<name>/SKILL.md` (repo root, not under `openspec/schemas/hash/`) so other schemas here (`spec-driven`) can reuse them. Frontmatter is just `name` + `description` (the format `vercel-labs/skills` and Claude Code both expect) — no repo-specific extensions.
+Local skills live at `skills/<name>/SKILL.md` (repo root, not under `openspec/schemas/tempa-spec/`) so any future schema added to this repo could reuse them — today `tempa-spec` is the only schema here. Frontmatter is just `name` + `description` (the format `vercel-labs/skills` and Claude Code both expect) — no repo-specific extensions.
 
 ## Templates
 

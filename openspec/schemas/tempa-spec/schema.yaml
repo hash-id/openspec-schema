@@ -1,5 +1,5 @@
-name: hash
-version: 7
+name: tempa-spec
+version: 8
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery

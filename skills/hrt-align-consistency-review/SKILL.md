@@ -1,11 +1,11 @@
 ---
 name: hrt-align-consistency-review
-description: Cross-artifact consistency review for OpenSpec's hash schema — checks discovery.md, proposal.md, specs/**/*.md, design.md, and tasks.md are mutually consistent and faithful to the requirements, BEFORE any code is written. One cycle is an ALIGN pass (HIGH/MEDIUM/LOW severity, MECHANICAL/DECISION resolution tagging), a fresh-context VERIFY pass that re-checks ALIGN's own findings and fixes, then a human WALKTHROUGH — one generic question per round covering the full artifact list; any walkthrough feedback re-enters ALIGN. Uncapped — exits only on a clean walkthrough round or explicit user sign-off. Use during the hash schema's `align` phase.
+description: Cross-artifact consistency review for OpenSpec's tempa-spec schema — checks discovery.md, proposal.md, specs/**/*.md, design.md, and tasks.md are mutually consistent and faithful to the requirements, BEFORE any code is written. One cycle is an ALIGN pass (HIGH/MEDIUM/LOW severity, MECHANICAL/DECISION resolution tagging), a fresh-context VERIFY pass that re-checks ALIGN's own findings and fixes, then a human WALKTHROUGH — one generic question per round covering the full artifact list; any walkthrough feedback re-enters ALIGN. Uncapped — exits only on a clean walkthrough round or explicit user sign-off. Use during the tempa-spec schema's `align` phase.
 ---
 
 # hrt-align-consistency-review
 
-Verify that every hash-schema artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and that a human has actually read them — not just that an agent checked them against each other.
+Verify that every tempa-spec artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and that a human has actually read them — not just that an agent checked them against each other.
 
 One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIFY** (a fresh-context subagent re-checks ALIGN's own map and fixes, catching what one session's blind spots might miss) then **WALKTHROUGH** (the human is shown the full artifact list and asked once whether anything needs to change). Feedback from WALKTHROUGH re-enters ALIGN. Repeat until a WALKTHROUGH round raises nothing new, or the user explicitly signs off early (see "Ending the loop"). There is no cap on the number of cycles — each cycle's number is reported to the user as it starts, so length is visible, not hidden.
 

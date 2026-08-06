@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPO="hash-id/openspec-schema"
 BRANCH="master"
-SCHEMA_NAME="hash"
+SCHEMA_NAME="tempa-spec"
 SCHEMA_PATH="openspec/schemas/${SCHEMA_NAME}"
 
 command -v git >/dev/null 2>&1 || {

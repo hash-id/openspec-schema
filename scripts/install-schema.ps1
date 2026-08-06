@@ -4,7 +4,7 @@ $PSNativeCommandUseErrorActionPreference = $false
 
 $Repo = "hash-id/openspec-schema"
 $Branch = "master"
-$SchemaName = "hash"
+$SchemaName = "tempa-spec"
 $SchemaPath = "openspec/schemas/$SchemaName"
 
 function Test-CommandExists {

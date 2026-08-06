@@ -1,6 +1,6 @@
 ---
 name: hrt-adversarial-authoring
-description: Author-then-adversarial-review authoring pass for a single OpenSpec artifact — a subagent drafts the artifact, two further subagents review it in fresh, isolated contexts with no visibility into the author's reasoning (a Destructive Critic for content/logic, a Structural Auditor for format/traceability), findings are resolved before the artifact is finalized. Parameterized by which artifact is being authored (proposal, specs, or design). Use during the hash schema's `proposal`, `specs`, and `design` phases.
+description: Author-then-adversarial-review authoring pass for a single OpenSpec artifact — a subagent drafts the artifact, two further subagents review it in fresh, isolated contexts with no visibility into the author's reasoning (a Destructive Critic for content/logic, a Structural Auditor for format/traceability), findings are resolved before the artifact is finalized. Parameterized by which artifact is being authored (proposal, specs, or design). Use during the tempa-spec schema's `proposal`, `specs`, and `design` phases.
 ---
 
 # hrt-adversarial-authoring

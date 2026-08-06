@@ -1,6 +1,6 @@
 ---
 name: hrt-apply-code-review
-description: Code-vs-artifacts review for OpenSpec's hash schema — checks implemented code against specs/**/*.md, design.md, and tasks.md once every task is complete. A loop of up to 3 passes, each run in a fresh subagent session with no memory of the implementer, HIGH/MEDIUM/LOW severity with MECHANICAL/DECISION resolution tagging, hard-gated on passing tests and lints. Use during the hash schema's `apply` Phase 2 review.
+description: Code-vs-artifacts review for OpenSpec's tempa-spec schema — checks implemented code against specs/**/*.md, design.md, and tasks.md once every task is complete. A loop of up to 3 passes, each run in a fresh subagent session with no memory of the implementer, HIGH/MEDIUM/LOW severity with MECHANICAL/DECISION resolution tagging, hard-gated on passing tests and lints. Use during the tempa-spec schema's `apply` Phase 2 review.
 ---
 
 # hrt-apply-code-review
