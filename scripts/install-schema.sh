@@ -2,9 +2,9 @@
 set -euo pipefail
 
 REPO="hash-id/openspec-schema"
-BRANCH="master"
 SCHEMA_NAME="tempa-spec"
 SCHEMA_PATH="openspec/schemas/${SCHEMA_NAME}"
+REF="${1:-}"
 
 command -v git >/dev/null 2>&1 || {
   echo "Error: git is required." >&2
@@ -23,12 +23,20 @@ case "$REPO" in
   *) URL="https://github.com/${REPO}.git" ;;
 esac
 
+if [ -z "$REF" ]; then
+  REF="$(git ls-remote --tags --sort='-v:refname' "$URL" 2>/dev/null | head -1 | sed 's|.*refs/tags/||')"
+  if [ -z "$REF" ]; then
+    echo "Error: no tags found on ${URL} and no ref given" >&2
+    exit 1
+  fi
+fi
+
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-echo "Fetching '${SCHEMA_NAME}' from ${URL} (branch ${BRANCH})..."
-if ! git clone --depth 1 --branch "$BRANCH" "$URL" "$TMP/repo" 2>/dev/null; then
-  echo "Error: failed to clone ${URL} at branch ${BRANCH}" >&2
+echo "Fetching '${SCHEMA_NAME}' from ${URL} (ref ${REF})..."
+if ! git clone --depth 1 --branch "$REF" "$URL" "$TMP/repo" 2>/dev/null; then
+  echo "Error: failed to clone ${URL} at ref ${REF}" >&2
   echo "       (private repo? use an SSH url or a token: https://github.com/settings/tokens)" >&2
   exit 1
 fi

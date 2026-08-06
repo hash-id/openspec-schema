@@ -3,9 +3,9 @@ $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $false
 
 $Repo = "hash-id/openspec-schema"
-$Branch = "master"
 $SchemaName = "tempa-spec"
 $SchemaPath = "openspec/schemas/$SchemaName"
+$Ref = if ($args.Count -gt 0) { $args[0] } else { "" }
 
 function Test-CommandExists {
     param([string]$Name)
@@ -30,16 +30,27 @@ if ($Repo -match '^(http|git@)') {
     $Url = "https://github.com/$Repo.git"
 }
 
+if ([string]::IsNullOrEmpty($Ref)) {
+    $ErrorActionPreference = "Continue"
+    $TagLines = git ls-remote --tags --sort='-v:refname' $Url 2>$null
+    $ErrorActionPreference = "Stop"
+    $Ref = ($TagLines | Select-Object -First 1) -replace '.*refs/tags/', ''
+    if ([string]::IsNullOrEmpty($Ref)) {
+        Write-Error "Error: no tags found on $Url and no ref given"
+        exit 1
+    }
+}
+
 $Tmp = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
 New-Item -ItemType Directory -Path $Tmp | Out-Null
 
 try {
-    Write-Host "Fetching '$SchemaName' from $Url (branch $Branch)..."
+    Write-Host "Fetching '$SchemaName' from $Url (ref $Ref)..."
     $ErrorActionPreference = "Continue"
-    git clone --depth 1 --branch $Branch $Url "$Tmp/repo" 2>&1 | Out-Null
+    git clone --depth 1 --branch $Ref $Url "$Tmp/repo" 2>&1 | Out-Null
     $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to clone $Url at branch $Branch`n       (private repo? use an SSH url or a token: https://github.com/settings/tokens)"
+        Write-Error "Error: failed to clone $Url at ref $Ref`n       (private repo? use an SSH url or a token: https://github.com/settings/tokens)"
         exit 1
     }
 
