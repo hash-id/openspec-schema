@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 8
+version: 9
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -9,11 +9,11 @@ artifacts:
     instruction: |
       Produce discovery.md through a relentless interview - do NOT write it first.
 
-      MUST use the `grill-me` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking - prefer, in order: codegraph (if available) > codebase-memory-mcp (if available and codegraph is not) > ripgrep (`rg`, MUST use over built-in grep/glob tools).
+      MUST use the `grilling` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking - prefer, in order: codegraph (if available) > codebase-memory-mcp (if available and codegraph is not) > ripgrep (`rg`, MUST use over built-in grep/glob tools).
 
-      discovery.md has a scope grill-me doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
+      discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
 
-      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. Do not infer confirmation from silence or from answering the last question alone.
+      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. Do not infer confirmation from silence or from answering the last question alone. Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST use ASD-STE100 register (one idea per sentence, active voice, short sentences, no unexplained jargon on first use).
 
       Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md.
     requires: []
