@@ -24,7 +24,7 @@ case "$REPO" in
 esac
 
 if [ -z "$REF" ]; then
-  REF="$(git ls-remote --tags --sort='-v:refname' "$URL" 2>/dev/null | head -1 | sed 's|.*refs/tags/||')"
+  REF="$(git ls-remote --tags --sort='-v:refname' "$URL" 2>/dev/null | grep -v '\^{}$' | head -1 | sed 's|.*refs/tags/||')"
   if [ -z "$REF" ]; then
     echo "Error: no tags found on ${URL} and no ref given" >&2
     exit 1

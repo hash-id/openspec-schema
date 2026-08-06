@@ -34,7 +34,7 @@ if ([string]::IsNullOrEmpty($Ref)) {
     $ErrorActionPreference = "Continue"
     $TagLines = git ls-remote --tags --sort='-v:refname' $Url 2>$null
     $ErrorActionPreference = "Stop"
-    $Ref = ($TagLines | Select-Object -First 1) -replace '.*refs/tags/', ''
+    $Ref = ($TagLines | Where-Object { $_ -notmatch '\^\{\}$' } | Select-Object -First 1) -replace '.*refs/tags/', ''
     if ([string]::IsNullOrEmpty($Ref)) {
         Write-Error "Error: no tags found on $Url and no ref given"
         exit 1
