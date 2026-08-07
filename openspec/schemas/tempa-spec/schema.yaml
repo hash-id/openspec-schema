@@ -13,9 +13,13 @@ artifacts:
 
       discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
 
-      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. Do not infer confirmation from silence or from answering the last question alone. Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST use ASD-STE100 register (one idea per sentence, active voice, short sentences, no unexplained jargon on first use).
+      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. 
+      Do not infer confirmation from silence or from answering the last question alone. 
+      Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST follow the `plain-language-writing` skill's COMMS rules.
 
-      Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md.
+      Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. 
+      The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md. 
+      Prose sections MUST follow the `plain-language-writing` skill's ARTIFACT rules.
     requires: []
 
   - id: proposal
@@ -186,7 +190,8 @@ apply:
   instruction: |
     MUST run in a fresh session, not a continuation of discovery-through-align - keeps planning noise out of the implementation context.
 
-    PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement.
+    PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement. 
+    This stop message and any blocker/pause message in PHASE 1 below MUST follow the `plain-language-writing` skill's COMMS rules.
 
     Two phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
 

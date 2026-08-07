@@ -34,8 +34,8 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIF
 7. Show this cycle's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
 8. Resolve them:
    - MECHANICAL findings: fix directly and record what changed.
-   - DECISION findings (this includes every HIGH that isn't a MECHANICAL fix): do NOT edit silently, and do NOT exit the skill to report them either. Surface each to the user ONE at a time: state the tradeoff neutrally first (what conflicts, and the valid resolution options), THEN your recommended resolution (grounded in discovery.md as the source of intent) — recommendation second, not first, so the user weighs the tradeoff before seeing your answer. Get an actual resolution or an explicit, reasoned defer from the user for each one — do not move on with a HIGH unaddressed.
-9. Append this cycle's ALIGN results to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made (including any explicit defer, with the user's stated reason).
+   - DECISION findings (this includes every HIGH that isn't a MECHANICAL fix): do NOT edit silently, and do NOT exit the skill to report them either. Surface each to the user ONE at a time: state the tradeoff neutrally first (what conflicts, and the valid resolution options), THEN your recommended resolution (grounded in discovery.md as the source of intent) — recommendation second, not first, so the user weighs the tradeoff before seeing your answer. This surfacing MUST follow the `plain-language-writing` skill's COMMS rules. Get an actual resolution or an explicit, reasoned defer from the user for each one — do not move on with a HIGH unaddressed.
+9. Append this cycle's ALIGN results to align.md: the findings (severity x mechanical/decision), the mechanical fixes applied, and the decisions the user made (including any explicit defer, with the user's stated reason). This prose MUST follow the `plain-language-writing` skill's ARTIFACT rules.
 10. Every HIGH issue needs one of two outcomes before ALIGN is done: fixed (mechanically or via the user's chosen resolution), or explicitly ruled out of scope by the user with a recorded reason — that counts as resolved, not deferred. A bare "let's deal with it later" is not enough; keep step 8's resolution conversation open on that item until it lands on one of these two outcomes. Only once every HIGH from this cycle's map has one of them, proceed to VERIFY.
 
 ## VERIFY
@@ -55,7 +55,7 @@ ALIGN and VERIFY verify the artifacts are consistent with each other. Neither ve
 One round, one question:
 
 1. List every artifact in build order — proposal.md, specs/**/*.md (one line per capability), design.md (if present), tasks.md — so the user sees exactly what exists to read before answering.
-2. Ask a single generic question covering the whole list: whether there's anything across these files the user wants changed — not a yes/no confirmation. An empty "nothing" answer is a valid outcome.
+2. Ask a single generic question covering the whole list: whether there's anything across these files the user wants changed — not a yes/no confirmation. An empty "nothing" answer is a valid outcome. This question MUST follow the `plain-language-writing` skill's COMMS rules.
 3. Record the round in align.md's Walkthrough log: the file list shown, tagged with the cycle number, and the user's answer verbatim (including a "nothing" answer).
 
 Do not infer the round was completed from silence, or from the user answering some other question in the conversation. The round needs its own recorded answer covering the full file list.
