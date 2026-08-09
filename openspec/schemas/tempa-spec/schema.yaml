@@ -41,7 +41,9 @@ artifacts:
       Research existing specs before filling this in - prefer, in order: codegraph (if available) > codebase-memory-mcp (if available and codegraph is not) > ripgrep (`rg`, MUST use over built-in grep/glob tools). Each capability listed here will need a corresponding spec file.
 
       Keep it concise (1-2 pages). Focus on the "why" not the "how", implementation details belong in design.md.
-      This is the foundation - specs, design, and tasks all build on this. Because nothing else exists yet to check it against, MUST use the `hrt-adversarial-authoring` skill (artifact: proposal) to draft and adversarially review it before finalizing.
+      This is the foundation - specs, design, and tasks all build on this.
+
+      MUST use the `hrt-adversarial-authoring` skill (artifact: proposal) to draft and adversarially review it before finalizing - nothing else exists yet to check it against.
     requires:
       - discovery
 
@@ -100,7 +102,7 @@ artifacts:
 
       Security requirements (per capability, not per change - a change can add one capability that touches a trust boundary and one that doesn't): check whether the capability touches a trust boundary - new or modified authentication/authorization, external/untrusted input, data exposure or storage, third-party integration, or privilege changes. If it does, SHOULD consider the `security-requirement-extraction` skill's categories when deriving requirements for it, and MUST still write the result as a normal `### Requirement` block above - no second requirement format. If it doesn't touch a trust boundary, the skill MUST NOT be invoked for that capability.
 
-      Once all spec files for this change are drafted, MUST use the `hrt-adversarial-authoring` skill (artifact: specs) to draft and adversarially review them before finalizing - `align`'s checks later verify structure and downstream coverage, not whether a requirement is genuinely the right thing to build.
+      MUST use the `hrt-adversarial-authoring` skill (artifact: specs) to draft and adversarially review them before finalizing, once all spec files for this change are drafted - `align`'s checks later verify structure and downstream coverage, not whether a requirement is genuinely the right thing to build.
     requires:
       - proposal
 
@@ -133,7 +135,7 @@ artifacts:
 
       Security pass (feeds Risks / Trade-offs): MUST check whether the change touches a trust boundary - new or modified authentication/authorization, external/untrusted input, data exposure or storage, third-party integration, or privilege changes. If none apply, MUST skip the security pass and MAY note the skip in one line; fill Risks / Trade-offs from ordinary (non-security) risk if relevant. If any apply, MUST use the `stride-analysis-patterns` skill for threat identification, then MUST use the `threat-mitigation-mapping` skill to map each identified threat to a mitigation, feeding Risks / Trade-offs as [Threat] → Mitigation entries.
 
-      MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing, folding in any security pass above as part of the Risks / Trade-offs content the draft subagent produces - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal.
+      MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal. Fold in any security pass above as part of the Risks / Trade-offs content the draft subagent produces.
     requires:
       - proposal
       - specs
