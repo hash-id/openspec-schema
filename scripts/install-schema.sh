@@ -44,9 +44,16 @@ trap 'rm -rf "$TMP"' EXIT
 
 echo "Fetching '${SCHEMA_NAME}' from ${URL} (ref ${REF})..."
 if ! git clone --depth 1 --branch "$REF" "$URL" "$TMP/repo" 2>/dev/null; then
-  echo "Error: failed to clone ${URL} at ref ${REF}" >&2
-  echo "       (private repo? use an SSH url or a token: https://github.com/settings/tokens)" >&2
-  exit 1
+  echo "Branch/tag clone failed, trying '${REF}' as a commit SHA..."
+  mkdir -p "$TMP/repo"
+  if ! git -C "$TMP/repo" init -q \
+    || ! git -C "$TMP/repo" remote add origin "$URL" \
+    || ! git -C "$TMP/repo" fetch --depth 1 origin "$REF" 2>/dev/null \
+    || ! git -C "$TMP/repo" checkout -q FETCH_HEAD; then
+    echo "Error: failed to fetch ${URL} at ref ${REF} (tried as branch/tag and as commit SHA)" >&2
+    echo "       (private repo? use an SSH url or a token: https://github.com/settings/tokens)" >&2
+    exit 1
+  fi
 fi
 
 SRC="$TMP/repo/${SCHEMA_PATH}"

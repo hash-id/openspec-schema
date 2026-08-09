@@ -58,8 +58,22 @@ try {
     git clone --depth 1 --branch $Ref $Url "$Tmp/repo" 2>&1 | Out-Null
     $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to clone $Url at ref $Ref`n       (private repo? use an SSH url or a token: https://github.com/settings/tokens)"
-        exit 1
+        Write-Host "Branch/tag clone failed, trying '$Ref' as a commit SHA..."
+        New-Item -ItemType Directory -Path (Join-Path $Tmp "repo") -Force | Out-Null
+        $ErrorActionPreference = "Continue"
+        git -C "$Tmp/repo" init -q 2>&1 | Write-Host
+        git -C "$Tmp/repo" remote add origin $Url 2>&1 | Write-Host
+        git -C "$Tmp/repo" fetch --depth 1 origin $Ref 2>&1 | Write-Host
+        $FetchOk = ($LASTEXITCODE -eq 0)
+        if ($FetchOk) {
+            git -C "$Tmp/repo" checkout -q FETCH_HEAD 2>&1 | Write-Host
+            $FetchOk = ($LASTEXITCODE -eq 0)
+        }
+        $ErrorActionPreference = "Stop"
+        if (-not $FetchOk) {
+            Write-Error "Error: failed to fetch $Url at ref $Ref (tried as branch/tag and as commit SHA)`n       (private repo? use an SSH url or a token: https://github.com/settings/tokens)"
+            exit 1
+        }
     }
 
     $Src = Join-Path $Tmp "repo/$SchemaPath"
