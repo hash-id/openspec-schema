@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 9
+version: 10
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -121,11 +121,12 @@ artifacts:
       - **Context**: Background, current state, constraints, stakeholders
       - **Goals / Non-Goals**: What this design achieves and explicitly excludes
       - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision.
+      - **Shape** (optional): For designs introducing new modules, functions, or call paths - key type/method signatures for new public functions, and which files are new vs. modified. Skip this section for designs that don't introduce new code structure (e.g., pure config or data changes).
       - **Risks / Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
       - **Open Questions**: Outstanding decisions or unknowns to resolve
 
-      Focus on architecture and approach, not line-by-line implementation.
+      Focus on architecture and approach, not line-by-line implementation - the optional Shape section above is the one exception, scoped to signatures and file layout, not function bodies.
       Reference the proposal for motivation and specs for requirements.
 
       Good design docs explain the "why" behind technical decisions.
@@ -149,23 +150,25 @@ artifacts:
 
       Guidelines:
       - Group related tasks under ## numbered headings
+      - Each heading MUST group tasks that together produce one demoable or verifiable slice - ask what can you demo or verify when everything under this heading is done? A heading with no answer is a horizontal slice (e.g. grouped by architectural layer instead of by behavior) - regroup around behavior instead
       - Each task MUST be a checkbox: `- [ ] X.Y Task description`
       - Tasks should be small enough to complete in one session
       - Order tasks by dependency (what must be done first?)
+      - Note blocking relationships explicitly where non-obvious (e.g. "blocked by 1.2")
 
       Where specs (`specs/**/*.md`) define WHEN/THEN scenarios covering both expected and failure behavior, and design.md's Risks/Trade-offs section defines `[Threat] → Mitigation` entries, each MUST trace to at least one task: a scenario or threat with no corresponding task is a coverage gap, not something for `tasks` to silently drop. Tasks tracing to a negative scenario or a threat mitigation SHOULD be tagged distinctly (e.g. a trailing `[negative]` / `[security]` marker) so `align` and the apply-phase review can check coverage without re-deriving it. Keep this lightweight - traceability existing is the MUST, not one-checkbox-per-scenario cardinality.
 
       Example:
       ```
-      ## 1. Setup
+      ## 1. Export CSV for a single table
 
-      - [ ] 1.1 Create new module structure
-      - [ ] 1.2 Add dependencies to package.json
+      - [ ] 1.1 Create export module and CSV formatting utility
+      - [ ] 1.2 Wire export command to a single hardcoded table
 
-      ## 2. Core Implementation
+      ## 2. Export CSV with filters applied
 
-      - [ ] 2.1 Implement data export function
-      - [ ] 2.2 Add CSV formatting utilities
+      - [ ] 2.1 Add filter parameter parsing
+      - [ ] 2.2 Apply filters before formatting output
       ```
 
       Reference specs for what needs to be built, design for how to build it.
