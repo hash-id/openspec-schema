@@ -20,6 +20,14 @@ if (-not (Test-CommandExists "npx")) {
     Write-Error "Error: npx (Node.js) is required."
     exit 1
 }
+if (-not (Test-CommandExists "npm")) {
+    Write-Error "Error: npm (Node.js) is required."
+    exit 1
+}
+if (-not (Test-CommandExists "node")) {
+    Write-Error "Error: node (Node.js) is required."
+    exit 1
+}
 
 $Dest = Join-Path (Get-Location) "openspec/schemas/$SchemaName"
 $Config = Join-Path (Get-Location) "openspec/config.yaml"
@@ -75,10 +83,10 @@ try {
 
     Write-Host "Installing skills..."
     $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add mattpocock/skills --skill grilling tdd --agent '*' -y 2>&1 | Write-Host
+    "" | npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs --agent '*' -y 2>&1 | Write-Host
     $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install grilling/tdd from mattpocock/skills"
+        Write-Error "Error: failed to install grilling/tdd/diagnosing-bugs from mattpocock/skills"
         exit 1
     }
     $ErrorActionPreference = "Continue"
@@ -101,15 +109,29 @@ try {
         New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
     }
 
-    $Lines = @()
-    if (Test-Path $Config) {
-        $Lines = Get-Content $Config | Where-Object { $_ -notmatch '^schema:' }
+    Write-Host "Writing schema + tooling context to $Config..."
+    $ErrorActionPreference = "Continue"
+    Push-Location $Tmp
+    "" | npm install --no-save --silent yaml 2>&1 | Write-Host
+    Pop-Location
+    $ErrorActionPreference = "Stop"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Error: failed to install the 'yaml' npm package for config merging"
+        exit 1
     }
-    $Lines += "schema: $SchemaName"
-    Set-Content -Path $Config -Value $Lines
+    Copy-Item (Join-Path $Tmp "repo/scripts/merge-config.cjs") (Join-Path $Tmp "merge-config.cjs")
+    $ContextMarker = "# tempa-spec: tooling preference"
+    $ContextText = "MUST use codegraph and ripgrep (``rg``) together for all codebase exploration, in every phase of this schema. Use codebase-memory-mcp or built-in grep/glob only if both are unavailable."
+    $ErrorActionPreference = "Continue"
+    node (Join-Path $Tmp "merge-config.cjs") $Config $SchemaName $ContextMarker $ContextText
+    $ErrorActionPreference = "Stop"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Error: failed to write $Config"
+        exit 1
+    }
 
     Write-Host "Installed '$SchemaName' -> $Dest"
-    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing)"
+    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing)"
     Write-Host "Set default schema -> $SchemaName ($Config)"
     Write-Host "Use it:  openspec new change <name>"
 }

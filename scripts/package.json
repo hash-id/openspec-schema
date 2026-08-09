@@ -1,0 +1,11 @@
+{
+  "name": "openspec-schema-scripts",
+  "private": true,
+  "description": "Dev-only dependency for testing merge-config.cjs. Not published; not used by the installer at runtime (the installer does its own throwaway npm install in a temp dir).",
+  "devDependencies": {
+    "yaml": "^2.6.0"
+  },
+  "scripts": {
+    "test": "node --test merge-config.test.cjs"
+  }
+}
