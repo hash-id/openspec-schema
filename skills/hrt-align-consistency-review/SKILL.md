@@ -29,8 +29,8 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIF
    - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed.
    - LOW: terminology drift, wording, formatting, ordering, or minor omissions.
 6. Tag every classified finding MECHANICAL or DECISION:
-   - MECHANICAL: exactly one correct fix, no scope or intent judgement (e.g. hashtag count, checkbox format, a kebab-case name mismatch, terminology unification, an obvious missing-scenario stub, task reordering).
-   - DECISION: more than one valid resolution, or it touches scope or intent (e.g. a capability-vs-spec mismatch, a requirement-vs-task gap, a design-vs-spec contradiction, an uncovered outcome, a vague requirement needing a specific normative choice).
+   - MECHANICAL: exactly one correct fix, no scope or intent judgement, AND a deterministic anchor — a grep/regex/count you can re-run to confirm before fixing (e.g. hashtag count, checkbox format, a kebab-case name mismatch, task reordering). "Obviously mechanical" isn't enough without that re-runnable check — a finding that fits the shape but has no anchor (e.g. "terminology unification" — deciding two terms mean the same thing; an "obvious" missing-scenario call) is DECISION instead.
+   - DECISION: more than one valid resolution, it touches scope or intent, or it fits MECHANICAL's shape but has no anchor (e.g. a capability-vs-spec mismatch, a requirement-vs-task gap, a design-vs-spec contradiction, an uncovered outcome, a vague requirement needing a specific normative choice — plus the unanchored cases above).
 7. Show this cycle's findings grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION.
 8. Resolve them:
    - MECHANICAL findings: fix directly and record what changed.
