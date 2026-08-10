@@ -38,11 +38,11 @@ Review the implemented code against the specs in a loop of at most 3 passes, sto
 7. The review session reports findings to the orchestrating session (not a file), grouped under HIGH / MEDIUM / LOW, each tagged MECHANICAL or DECISION. The orchestrating session then displays them to the user on screen.
 8. The orchestrating session resolves them, staying in red-green-refactor and re-running tests after each change:
    - MECHANICAL findings: fix the code or tests directly.
-   - DECISION findings: do NOT change behaviour silently. Surface each to the user ONE at a time, your recommended resolution first (grounded in specs and design.md), and apply only what the user confirms or adjusts.
+   - DECISION findings: do NOT change behaviour silently. Surface each to the user ONE at a time, your recommended resolution first (grounded in specs and design.md), and apply only what the user confirms or adjusts. This surfacing MUST follow the `plain-language-writing` skill's COMMS rules.
    - Either kind: if the fix's root cause isn't obvious from the finding description, or re-running tests after a fix surfaces a new or different failure, MUST use the `diagnosing-bugs` skill before attempting another fix - don't keep changing code on guesses.
 
 Fixes from step 8 land before the next pass starts, so the next fresh session reviews the updated code.
 
 ## Loop exit
 
-Stop when a pass finds no HIGH and no MEDIUM issues, or after the 3rd pass. The loop MUST NOT stop while the test suite or linters are failing, regardless of the subagent's HIGH/MEDIUM/LOW classification — a failing run is always a blocking HIGH. If any HIGH issue is still unresolved when the loop ends, STOP and mark the change as a RELEASE BLOCKER: report the remaining HIGH issues on screen and tell the user NOT to archive the change until they are resolved. Remaining MEDIUM and LOW issues are shown on screen as known issues.
+Stop when a pass finds no HIGH and no MEDIUM issues, or after the 3rd pass. The loop MUST NOT stop while the test suite or linters are failing, regardless of the subagent's HIGH/MEDIUM/LOW classification — a failing run is always a blocking HIGH. If any HIGH issue is still unresolved when the loop ends, STOP and mark the change as a RELEASE BLOCKER: report the remaining HIGH issues on screen and tell the user NOT to archive the change until they are resolved. Remaining MEDIUM and LOW issues are shown on screen as known issues. This report and blocker message MUST follow the `plain-language-writing` skill's COMMS rules.
