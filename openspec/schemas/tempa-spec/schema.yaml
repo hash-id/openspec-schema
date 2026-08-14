@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 10
+version: 11
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -10,6 +10,8 @@ artifacts:
       Produce discovery.md through a relentless interview - do NOT write it first.
 
       MUST use the `grilling` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking.
+
+      If shared understanding depends on a fact about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that fact isn't already known with confidence, MUST use the `research` skill to verify it against primary sources before asking the user or writing it into discovery.md as settled. Skip this for facts fully answerable from the codebase itself.
 
       discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
 
@@ -39,6 +41,8 @@ artifacts:
 
       IMPORTANT: The Capabilities section is critical. It creates the contract between proposal and specs phases.
       Research existing specs before filling this in. Each capability listed here will need a corresponding spec file.
+
+      If the proposal's feasibility rests on a claim about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that claim isn't already verified, MUST use the `research` skill to check it against primary sources before writing it into proposal.md. Skip this for claims fully answerable from the codebase itself.
 
       Keep it concise (1-2 pages). Focus on the "why" not the "how", implementation details belong in design.md.
       This is the foundation - specs, design, and tasks all build on this.

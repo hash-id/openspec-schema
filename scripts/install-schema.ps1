@@ -97,10 +97,10 @@ try {
 
     Write-Host "Installing skills..."
     $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs --agent '*' -y 2>&1 | Write-Host
+    "" | npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs research --agent '*' -y 2>&1 | Write-Host
     $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install grilling/tdd/diagnosing-bugs from mattpocock/skills"
+        Write-Error "Error: failed to install grilling/tdd/diagnosing-bugs/research from mattpocock/skills"
         exit 1
     }
     $ErrorActionPreference = "Continue"
@@ -152,7 +152,7 @@ try {
     }
 
     Write-Host "Installed '$SchemaName' -> $Dest"
-    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
+    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
     Write-Host "Set default schema -> $SchemaName ($Config)"
     Write-Host "Use it:  openspec new change <name>"
 }

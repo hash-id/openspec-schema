@@ -72,8 +72,8 @@ done
 shopt -u nullglob
 
 echo "Installing skills..."
-npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs --agent '*' -y < /dev/null || {
-  echo "Error: failed to install grilling/tdd/diagnosing-bugs from mattpocock/skills" >&2
+npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs research --agent '*' -y < /dev/null || {
+  echo "Error: failed to install grilling/tdd/diagnosing-bugs/research from mattpocock/skills" >&2
   exit 1
 }
 npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction --agent '*' -y < /dev/null || {
@@ -104,6 +104,6 @@ node "$TMP/merge-config.cjs" "$CONFIG" "$SCHEMA_NAME" "$CONTEXT_MARKER" "$CONTEX
 }
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
+echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"
