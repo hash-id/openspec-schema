@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.8.14 — 2026-08-14 (schema v11)
+
+- Gates MECHANICAL/anchored auto-resolve in `align`'s consistency review behind deterministic checks (was judgement-only)
+- Cites `plain-language-writing`'s COMMS rule set at each user-surfacing point in the `hrt-*` skills, not once at the top
+- Forbids spec-archive/sync tasks in `tasks.md`
+- Adds `humanizer` skill, cited from `hrt-adversarial-authoring` (Author Notes, reviewer output), `hrt-align-consistency-review`, and `hrt-apply-code-review` (all agent-reasoning surfaces, distinct from `plain-language-writing`'s COMMS/ARTIFACT scope)
+- Adds `research` skill (`mattpocock/skills`), pointed to from `discovery`/`proposal` for feasibility claims resting on unverified external facts (third-party API behavior, library limits, standard specs)
+
 ## 2026.8.10 — 2026-08-09
 
 - Installer falls back to `git init` + `fetch --depth 1` when `--branch` fails, so a commit SHA can be passed as install ref
