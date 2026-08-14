@@ -84,6 +84,10 @@ npx --yes skills@latest add "${REPO}/skills" --agent '*' -y < /dev/null || {
   echo "Error: failed to install hrt-* skills from ${REPO}/skills" >&2
   exit 1
 }
+npx --yes skills@latest add blader/humanizer --skill humanizer --agent '*' -y < /dev/null || {
+  echo "Error: failed to install humanizer from blader/humanizer" >&2
+  exit 1
+}
 
 mkdir -p "$(dirname "$CONFIG")"
 echo "Writing schema + tooling context to ${CONFIG}..."
@@ -100,6 +104,6 @@ node "$TMP/merge-config.cjs" "$CONFIG" "$SCHEMA_NAME" "$CONTEXT_MARKER" "$CONTEX
 }
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing)"
+echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

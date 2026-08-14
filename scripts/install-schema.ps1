@@ -117,6 +117,13 @@ try {
         Write-Error "Error: failed to install hrt-* skills from $Repo/skills"
         exit 1
     }
+    $ErrorActionPreference = "Continue"
+    "" | npx --yes skills@latest add blader/humanizer --skill humanizer --agent '*' -y 2>&1 | Write-Host
+    $ErrorActionPreference = "Stop"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Error: failed to install humanizer from blader/humanizer"
+        exit 1
+    }
 
     $ConfigDir = Split-Path -Parent $Config
     if (-not (Test-Path $ConfigDir)) {
@@ -145,7 +152,7 @@ try {
     }
 
     Write-Host "Installed '$SchemaName' -> $Dest"
-    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing)"
+    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, plain-language-writing, humanizer)"
     Write-Host "Set default schema -> $SchemaName ($Config)"
     Write-Host "Use it:  openspec new change <name>"
 }
