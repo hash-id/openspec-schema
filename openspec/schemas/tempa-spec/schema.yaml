@@ -15,9 +15,11 @@ artifacts:
 
       discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
 
-      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached. 
-      Do not infer confirmation from silence or from answering the last question alone. 
+      Do NOT proceed to write discovery.md until the user has explicitly confirmed shared understanding has been reached.
+      Do not infer confirmation from silence or from answering the last question alone.
       Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST follow the `plain-language-writing` skill's COMMS rules.
+
+      Dark mode: MUST NOT offer, suggest, or mention dark mode proactively, at any point. Only if the user asks for it unprompted, in their own words, MUST use `dark-mode-opt-in` before continuing.
 
       Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. 
       The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md. 
@@ -48,6 +50,8 @@ artifacts:
       This is the foundation - specs, design, and tasks all build on this.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: proposal) to draft and adversarially review it before finalizing - nothing else exists yet to check it against.
+
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Proposal section. Everything else about `hrt-adversarial-authoring`'s auto-resolve rule is unchanged.
     requires:
       - discovery
 
@@ -107,6 +111,8 @@ artifacts:
       Security requirements (per capability, not per change - a change can add one capability that touches a trust boundary and one that doesn't): check whether the capability touches a trust boundary - new or modified authentication/authorization, external/untrusted input, data exposure or storage, third-party integration, or privilege changes. If it does, SHOULD consider the `security-requirement-extraction` skill's categories when deriving requirements for it, and MUST still write the result as a normal `### Requirement` block above - no second requirement format. If it doesn't touch a trust boundary, the skill MUST NOT be invoked for that capability.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: specs) to draft and adversarially review them before finalizing, once all spec files for this change are drafted - `align`'s checks later verify structure and downstream coverage, not whether a requirement is genuinely the right thing to build.
+
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Specs section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
     requires:
       - proposal
 
@@ -140,6 +146,8 @@ artifacts:
       Security pass (feeds Risks / Trade-offs): MUST check whether the change touches a trust boundary - new or modified authentication/authorization, external/untrusted input, data exposure or storage, third-party integration, or privilege changes. If none apply, MUST skip the security pass and MAY note the skip in one line; fill Risks / Trade-offs from ordinary (non-security) risk if relevant. If any apply, MUST use the `stride-analysis-patterns` skill for threat identification, then MUST use the `threat-mitigation-mapping` skill to map each identified threat to a mitigation, feeding Risks / Trade-offs as [Threat] → Mitigation entries.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal. Fold in any security pass above as part of the Risks / Trade-offs content the draft subagent produces.
+
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Design section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
     requires:
       - proposal
       - specs
@@ -193,6 +201,8 @@ artifacts:
     template: align.md
     instruction: |
       MUST use the `hrt-align-consistency-review` skill to verify that every artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and to write the findings into align.md.
+
+      Dark mode (`dark.md` exists): ALIGN's DECISION/HIGH findings MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Align section. VERIFY and WALKTHROUGH are unchanged - WALKTHROUGH stays the mandatory closing review; the user is just also shown `dark.md`.
     requires:
       - tasks
 
@@ -203,7 +213,14 @@ apply:
   instruction: |
     MUST run in a fresh session, not a continuation of discovery-through-align - keeps planning noise out of the implementation context.
 
-    PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement. 
+    MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
+
+    FIRST, check `dark.md`:
+    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 already reads below. In PHASE 2, findings MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Apply section. After PHASE 2, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
+    - Exists, header = planning-only -> STOP. Do not run apply in this session. Tell the user planning-only dark mode ends at WALKTHROUGH; apply happens elsewhere.
+    - Does not exist -> proceed to PHASE 0 below, unchanged.
+
+    PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement.
     This stop message and any blocker/pause message in PHASE 1 below MUST follow the `plain-language-writing` skill's COMMS rules.
 
     Two phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
