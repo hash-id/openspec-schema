@@ -18,6 +18,14 @@
      Use existing spec names from openspec/specs/. Leave empty if no requirement changes. -->
 - `<existing-name>`: <what requirement is changing>
 
+## External Dependencies
+
+<!-- Every claim this proposal's feasibility rests on about a system outside this codebase: a third-party API's capability, a library's documented limit, a standard's requirement. One row per claim. "Verified?" is "yes" only with a primary-source citation (link or doc reference) or a completed `research` skill run. Write "none" below the table if the change is fully internal. -->
+
+| Claim | External system | Primary source | Verified? |
+| --- | --- | --- | --- |
+| <claim the change depends on> | <API / library / standard> | <url or doc reference> | <yes / no> |
+
 ## Impact
 
 <!-- Affected code, APIs, dependencies, systems -->

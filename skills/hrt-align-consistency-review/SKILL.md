@@ -11,22 +11,23 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIF
 
 ## ALIGN
 
-1. Re-read all artifacts: discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md. Also run `openspec validate --strict` for deterministic structural checks.
+1. Re-read all artifacts: discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md. Also run `openspec validate --strict` for deterministic structural checks. `design.md` is mandatory for every change — its absence is a HIGH finding (thin sections are fine, a missing file is not).
 2. Build a consistency map: for each dimension below, list what you checked and what you found — BEFORE moving to classification.
    - discovery -> proposal: every Key Decision and Desired Outcome is honoured; the proposal never contradicts discovery. LLM judgment only.
    - proposal -> specs: every New/Modified Capability has a spec file; no spec covers a capability absent from the proposal. Grep/glob first (capability name -> `specs/<name>/spec.md` exists) - existence is a fact, not a judgment call.
    - proposal <-> design: design stays within proposal scope and introduces no capability the proposal omits. LLM judgment only.
    - specs <-> design: design explains how each requirement is met and contradicts none of them. LLM judgment only.
    - specs -> tasks: every requirement and scenario (including negative/edge-case scenarios) is covered by at least one task; no task is out of scope. Grep tasks.md for a reference to each requirement/scenario first - zero mentions is a fact; judge adequacy of coverage only after that.
-   - design -> tasks (when design.md exists and has a security pass): every `[Threat] → Mitigation` entry in Risks/Trade-offs has at least one corresponding negative-test task. Grep tasks.md for each `[Threat] →` entry first - zero mentions is a HIGH finding, same as an uncovered requirement.
+   - design -> tasks (when design.md has a security pass): every `[Threat] → Mitigation` entry in Risks/Trade-offs has at least one corresponding negative-test task. Grep tasks.md for each `[Threat] →` entry first - zero mentions is a HIGH finding, same as an uncovered requirement.
+   - specs <-> seams: every `#### Scenario` in `specs/**` has a seam in `design.md`'s Shape / Seams section its tests could attach to, and every seam's `Covers:` target names a real requirement/scenario in `specs/**`. Grep each `Covers:` value first - the reverse direction is a fact; judge test-attachment fit only after. Skip only when `design.md`'s Shape / Seams section is the one-line "no new code surface" note (pure config/data change).
    - spec structure: every requirement has at least one scenario, scenarios use exactly four hashtags (####) with WHEN/THEN, and requirements use SHALL/MUST. Fully mechanical - grep/regex, no judgment needed.
    - design/tasks -> codebase: every concrete claim design.md or tasks.md makes about the existing system (a function, method, module, file, endpoint, schema, or config it says already exists or must be touched) is checked against the actual codebase, not assumed. MUST use a tool (codegraph > codebase-memory-mcp > ripgrep) for existence; judge only whether the artifact's characterization of that code is accurate.
    - On cycle 2+: also fold in whatever the prior WALKTHROUGH round raised — treat each as its own item in the map, not a footnote.
 3. Rule for all dimensions above: mechanize only the existence/reference/structural half (does X exist, is X referenced, is the format right), never the semantic half (does X actually fulfill the intent). A keyword match is not a substitute for that judgment.
-4. STOP. Do not classify yet. Confirm the consistency map above is complete for all 7 dimensions (plus any carried-over walkthrough items) before proceeding.
+4. STOP. Do not classify yet. Confirm the consistency map above is complete for all 8 dimensions (plus any carried-over walkthrough items) before proceeding.
 5. Classify every finding in the map by severity:
    - HIGH: a contradiction between artifacts; a capability with no spec (or a spec with no capability); a requirement with no covering task; a structural error that breaks OpenSpec parsing; a Desired Outcome traceable to nothing; a design/tasks claim about the codebase (a referenced function, module, file, or API) that doesn't match reality.
-   - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed.
+   - MEDIUM: partial coverage; a vague or untestable requirement; a non-trivial technical choice with no design decision; tasks too coarse or mis-ordered; an edge case implied by discovery but left unscenarioed; a scenario with no seam it could attach to, or a seam naming a "Covers:" target that isn't in the specs.
    - LOW: terminology drift, wording, formatting, ordering, or minor omissions.
 6. Tag every classified finding MECHANICAL or DECISION:
    - MECHANICAL: exactly one correct fix, no scope or intent judgement, AND a deterministic anchor — a grep/regex/count you can re-run to confirm before fixing (e.g. hashtag count, checkbox format, a kebab-case name mismatch, task reordering). "Obviously mechanical" isn't enough without that re-runnable check — a finding that fits the shape but has no anchor (e.g. "terminology unification" — deciding two terms mean the same thing; an "obvious" missing-scenario call) is DECISION instead.
@@ -43,7 +44,7 @@ One cycle: **ALIGN** (this agent checks cross-artifact consistency) then **VERIF
 ALIGN classifies its own findings and applies its own MECHANICAL fixes with nothing independent checking that work. VERIFY closes that gap with one fresh-context re-check.
 
 1. Spawn a subagent with no memory of the ALIGN pass above: it receives only the artifacts as they now stand (post-fix) and this skill's ALIGN step 2 checklist. It does NOT receive the consistency map, findings, or resolutions ALIGN produced.
-2. It re-derives its own consistency map against the same 7 dimensions (plus carried-over walkthrough items, if any) and reports back: any HIGH it finds that ALIGN's map missed, and any MECHANICAL fix ALIGN applied that it can verify is actually correct (fix matches what the artifact now needs) vs. still wrong or incomplete.
+2. It re-derives its own consistency map against the same 8 dimensions (plus carried-over walkthrough items, if any) and reports back: any HIGH it finds that ALIGN's map missed, and any MECHANICAL fix ALIGN applied that it can verify is actually correct (fix matches what the artifact now needs) vs. still wrong or incomplete.
 3. If VERIFY finds nothing new: proceed to WALKTHROUGH.
 4. If VERIFY finds a HIGH ALIGN missed, or a MECHANICAL fix that didn't actually resolve the finding: fold it into this cycle's map (append to align.md same as any ALIGN finding), resolve it via ALIGN step 8's rules (MECHANICAL fixed directly, DECISION surfaced to the user), then proceed to WALKTHROUGH — do not re-run VERIFY again within the same cycle; a second miss is caught by the next cycle's VERIFY if WALKTHROUGH reopens one.
 5. If a subagent cannot be spawned in the current environment: state that VERIFY could not run and ask the user whether to proceed to WALKTHROUGH without it. Do not silently skip this step.
@@ -54,7 +55,7 @@ ALIGN and VERIFY verify the artifacts are consistent with each other. Neither ve
 
 One round, one question:
 
-1. List every artifact in build order — proposal.md, specs/**/*.md (one line per capability), design.md (if present), tasks.md — so the user sees exactly what exists to read before answering.
+1. List every artifact in build order — proposal.md, specs/**/*.md (one line per capability), design.md, tasks.md — so the user sees exactly what exists to read before answering.
 2. Ask a single generic question covering the whole list: whether there's anything across these files the user wants changed — not a yes/no confirmation. An empty "nothing" answer is a valid outcome. This question MUST follow the `plain-language-writing` skill's COMMS rules.
 3. Record the round in align.md's Walkthrough log: the file list shown, tagged with the cycle number, and the user's answer verbatim (including a "nothing" answer).
 

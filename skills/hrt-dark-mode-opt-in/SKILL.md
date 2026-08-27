@@ -1,11 +1,11 @@
 ---
-name: dark-mode-opt-in
+name: hrt-dark-mode-opt-in
 description: Opt-in gate for tempa-spec's dark mode (bounded autonomous decision-making across discovery-through-align, optionally through apply). Never offered proactively - only activates when the user asks for it unprompted, in their own words. Shows a mandatory risk warning before any confirmation, then asks which variant (planning-only or +implementation) and creates dark.md. Use once, at or after discovery, only on explicit user request.
 ---
 
-# dark-mode-opt-in
+# hrt-dark-mode-opt-in
 
-Lets the agent resolve findings that would normally escalate to the user - across `proposal`, `specs`, `design`, `align`, optionally `apply` - via `dark-mode-decision-gate`, logging every decision to `dark.md`. WALKTHROUGH stays mandatory in every variant.
+Lets the agent resolve findings that would normally escalate to the user - across `proposal`, `specs`, `design`, `align`, optionally `apply` - via `hrt-dark-mode-decision-gate`, logging every decision to `dark.md`. WALKTHROUGH stays mandatory in every variant.
 
 ## Never proactive
 MUST NOT offer, suggest, or mention dark mode - at any phase, in any form. This skill MUST NOT run unless the user has already asked for dark mode unprompted, in their own words. If they never ask, this skill never runs and nothing changes.
@@ -14,7 +14,7 @@ MUST NOT offer, suggest, or mention dark mode - at any phase, in any form. This 
 1. User asked for dark mode. Show the warning below, in full, unedited, before anything else.
 2. Ask which variant:
    - **Planning-only.** Covers `discovery` through `align`. WALKTHROUGH stays a fully manual closing review. `apply` is out of scope for this run.
-   - **+implementation.** Same, then continues automatically into `apply` in the same session after a clean WALKTHROUGH, using `dark-mode-decision-gate` for `apply`'s review findings too. A second closing review happens after `apply`, showing the code diff alongside `dark.md`.
+   - **+implementation.** Same, then continues automatically into `apply` in the same session after a clean WALKTHROUGH, using `hrt-dark-mode-decision-gate` for `apply`'s review findings too. A second closing review happens after `apply`, showing the code diff alongside `dark.md`.
 
    State that +implementation carries every planning-only risk plus the risk that a bad decision reaches shipped code, not just a document.
 3. MUST get an explicit answer naming the variant before proceeding. MUST NOT treat silence, or an answer to a different question, as that answer.

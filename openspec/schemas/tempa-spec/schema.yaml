@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 11
+version: 12
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
@@ -11,6 +11,8 @@ artifacts:
 
       MUST use the `grilling` skill to run the interview. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking.
 
+      Before starting the interview, if `openspec/BACKLOG.md` exists, read it. Its entries are slices deferred from earlier changes' planning. Use any entry's "Slice" and "Deferred because" lines as context for the interview — do not re-litigate ground an entry already covers. This is read-only context; do not edit or remove entries here. If the file does not exist, continue without comment.
+
       If shared understanding depends on a fact about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that fact isn't already known with confidence, MUST use the `research` skill to verify it against primary sources before asking the user or writing it into discovery.md as settled. Skip this for facts fully answerable from the codebase itself.
 
       discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
@@ -19,9 +21,9 @@ artifacts:
       Do not infer confirmation from silence or from answering the last question alone.
       Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST follow the `plain-language-writing` skill's COMMS rules.
 
-      Dark mode: MUST NOT offer, suggest, or mention dark mode proactively, at any point. Only if the user asks for it unprompted, in their own words, MUST use `dark-mode-opt-in` before continuing.
+      Dark mode: MUST NOT offer, suggest, or mention dark mode proactively, at any point. Only if the user asks for it unprompted, in their own words, MUST use `hrt-dark-mode-opt-in` before continuing.
 
-      Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why. 
+      Once the interview has converged, write discovery.md from the template. discovery.md is the REASONING log - the why-behind-the-why.
       The proposal phase reads this file as context and produces the contract (Why / What Changes / Capabilities / Impact); technical decisions and risks go in design.md. 
       Prose sections MUST follow the `plain-language-writing` skill's ARTIFACT rules.
     requires: []
@@ -35,23 +37,24 @@ artifacts:
 
       Sections:
       - **Why**: 1-2 sentences on the problem or opportunity. What problem does this solve? Why now?
-      - **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.
+      - **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**. Before finalizing this list, MUST use the `hrt-change-size-gate` skill to check whether it bundles several independent changes that should be split. In dark mode (`dark.md` exists) that skill's escalation still goes to the user, not `hrt-dark-mode-decision-gate` — same carve-out as the security decisions.
       - **Capabilities**: Identify which specs will be created or modified:
         - **New Capabilities**: List capabilities being introduced. Each becomes a new `specs/<name>/spec.md`. Use kebab-case names (e.g., `user-auth`, `data-export`).
         - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes (not just implementation details). Each needs a delta spec file. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
+      - **External Dependencies**: One row per out-of-codebase claim the change's feasibility rests on (a third-party API's capability, a library's limit, a standard's requirement). "Verified?" is "yes" only with a primary-source citation or a completed `research` run. Write "none" if fully internal. Any "no" row MUST be resolved with the `research` skill before finalizing.
       - **Impact**: Affected code, APIs, dependencies, or systems.
 
       IMPORTANT: The Capabilities section is critical. It creates the contract between proposal and specs phases.
       Research existing specs before filling this in. Each capability listed here will need a corresponding spec file.
 
-      If the proposal's feasibility rests on a claim about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that claim isn't already verified, MUST use the `research` skill to check it against primary sources before writing it into proposal.md. Skip this for claims fully answerable from the codebase itself.
+      The External Dependencies table above is where this is enforced - unverified rows block finalizing. Claims fully answerable from the codebase do not go in the table.
 
       Keep it concise (1-2 pages). Focus on the "why" not the "how", implementation details belong in design.md.
       This is the foundation - specs, design, and tasks all build on this.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: proposal) to draft and adversarially review it before finalizing - nothing else exists yet to check it against.
 
-      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Proposal section. Everything else about `hrt-adversarial-authoring`'s auto-resolve rule is unchanged.
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding MUST route to `hrt-dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Proposal section. Everything else about `hrt-adversarial-authoring`'s auto-resolve rule is unchanged.
     requires:
       - discovery
 
@@ -112,7 +115,7 @@ artifacts:
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: specs) to draft and adversarially review them before finalizing, once all spec files for this change are drafted - `align`'s checks later verify structure and downstream coverage, not whether a requirement is genuinely the right thing to build.
 
-      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Specs section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `hrt-dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Specs section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
     requires:
       - proposal
 
@@ -121,24 +124,18 @@ artifacts:
     description: Technical design document with implementation details
     template: design.md
     instruction: |
-      Create the design document that explains HOW to implement the change.
-
-      When to include design.md (create only if any apply):
-      - Cross-cutting change (multiple services/modules) or new architectural pattern
-      - New external dependency or significant data model changes
-      - Security, performance, or migration complexity
-      - Ambiguity that benefits from technical decisions before coding
+      Create the design document that explains HOW to implement the change. design.md is MANDATORY for every change - always create it. Depth varies: a cross-cutting change, a new dependency, security/performance/migration complexity, or design ambiguity means full sections; a pure config/data/infra change means thin sections and a one-line "no new code surface" in Shape / Seams. A section that does not apply gets a one-line "N/A - <reason>", never removal.
 
       Sections:
       - **Context**: Background, current state, constraints, stakeholders
       - **Goals / Non-Goals**: What this design achieves and explicitly excludes
       - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision.
-      - **Shape** (optional): For designs introducing new modules, functions, or call paths - key type/method signatures for new public functions, and which files are new vs. modified. Skip this section for designs that don't introduce new code structure (e.g., pure config or data changes).
+      - **Shape / Seams**: required whenever the change introduces callable code. List each seam — the public boundary where `apply`'s tests will attach. For each: its signature, and which spec requirement or scenario has its tests attached there (`Covers: <name>`). Prefer boundaries that already exist in the codebase (explore for them, per `context:`'s rules); add a new seam only when no existing boundary fits, and say why. Skip this section with a one-line note ("no new code surface") only for pure config, data, or infra changes.
       - **Risks / Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
       - **Open Questions**: Outstanding decisions or unknowns to resolve
 
-      Focus on architecture and approach, not line-by-line implementation - the optional Shape section above is the one exception, scoped to signatures and file layout, not function bodies.
+      Focus on architecture and approach, not line-by-line implementation - the Shape / Seams section above is the one exception, scoped to signatures and file layout, not function bodies.
       Reference the proposal for motivation and specs for requirements.
 
       Good design docs explain the "why" behind technical decisions.
@@ -147,7 +144,7 @@ artifacts:
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal. Fold in any security pass above as part of the Risks / Trade-offs content the draft subagent produces.
 
-      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Design section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
+      Dark mode (`dark.md` exists): a single-reviewer UNANCHORED finding from `hrt-adversarial-authoring` MUST route to `hrt-dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Design section. ANCHORED findings and findings both independent reviewers raised keep auto-resolving as they do outside dark mode.
     requires:
       - proposal
       - specs
@@ -164,11 +161,13 @@ artifacts:
 
       Guidelines:
       - Group related tasks under ## numbered headings
-      - Each heading MUST group tasks that together produce one demoable or verifiable slice - ask what can you demo or verify when everything under this heading is done? A heading with no answer is a horizontal slice (e.g. grouped by architectural layer instead of by behavior) - regroup around behavior instead
+      - Each heading MUST group tasks that together produce one demoable or verifiable slice - ask what can you demo or verify when everything under this heading is done? A heading with no answer is a horizontal slice (e.g. grouped by architectural layer instead of by behavior) - regroup around behavior instead (exception: wide refactors — see below)
       - Each task MUST be a checkbox: `- [ ] X.Y Task description`
       - Tasks should be small enough to complete in one session
       - Order tasks by dependency (what must be done first?)
       - Note blocking relationships explicitly where non-obvious (e.g. "blocked by 1.2")
+
+      **Wide-refactor exception.** If `design.md` identifies the change as a mechanical edit repeated across many call sites (a rename, a retype, a signature change) where no vertical slice can be demoed as a feature, the demoability-per-heading rule does not apply. Use expand → migrate → contract as sequential headings: `## 1. Expand` (new form added alongside the old), `## 2. Migrate call sites` (in batches; may span several headings), `## 3. Contract` (remove the old form). "Verifiable" for these headings means the test suite stays green, not that a new behavior is visible.
 
       Where specs (`specs/**/*.md`) define WHEN/THEN scenarios covering both expected and failure behavior, and design.md's Risks/Trade-offs section defines `[Threat] → Mitigation` entries, each MUST trace to at least one task: a scenario or threat with no corresponding task is a coverage gap, not something for `tasks` to silently drop. 
       Tasks tracing to a negative scenario or a threat mitigation SHOULD be tagged distinctly (e.g. a trailing `[negative]` / `[security]` marker) so `align` and the apply-phase review can check coverage without re-deriving it. Keep this lightweight - traceability existing is the MUST, not one-checkbox-per-scenario cardinality.
@@ -202,7 +201,9 @@ artifacts:
     instruction: |
       MUST use the `hrt-align-consistency-review` skill to verify that every artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and to write the findings into align.md.
 
-      Dark mode (`dark.md` exists): ALIGN's DECISION/HIGH findings MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Align section. VERIFY and WALKTHROUGH are unchanged - WALKTHROUGH stays the mandatory closing review; the user is just also shown `dark.md`.
+      When `design.md`'s Shape / Seams section lists real seams (not the "no new code surface" note), the WALKTHROUGH round MUST also point the user at it by name: the seams are the test boundaries the implementation will be built against, and a wrong one is easy to skim past because it reads as a signature, not a behavior. Ask the user to read that section specifically.
+
+      Dark mode (`dark.md` exists): ALIGN's DECISION/HIGH findings MUST route to `hrt-dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Align section. VERIFY and WALKTHROUGH are unchanged - WALKTHROUGH stays the mandatory closing review; the user is just also shown `dark.md`.
     requires:
       - tasks
 
@@ -216,7 +217,7 @@ apply:
     MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
 
     FIRST, check `dark.md`:
-    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 already reads below. In PHASE 2, findings MUST route to `dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Apply section. After PHASE 2, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
+    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 already reads below. A seam-mismatch blocker in PHASE 1 routes to `hrt-dark-mode-decision-gate` (logged to `dark.md`'s Apply section), not to the user — the gate can weigh an alternative seam against the code, design, and specs. In PHASE 2, findings MUST route to `hrt-dark-mode-decision-gate` instead of the user, logged to `dark.md`'s Apply section. After PHASE 2, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
     - Exists, header = planning-only -> STOP. Do not run apply in this session. Tell the user planning-only dark mode ends at WALKTHROUGH; apply happens elsewhere.
     - Does not exist -> proceed to PHASE 0 below, unchanged.
 
@@ -228,6 +229,7 @@ apply:
     PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time):
     MUST use the `tdd` skill for seam confirmation, the RED/GREEN loop, and the anti-patterns to avoid (implementation-coupled tests, tautological tests, horizontal slicing). For each pending checkbox task, follow the skill's loop, then tick the checkbox to [x] and move to the next task.
     Override: unlike the `tdd` skill's default (which defers refactoring to the `code-review` review stage), REFACTOR stays inside this loop as step 3 (only while GREEN, never while RED) - tick the checkbox only after it.
+    **Seam override.** Seams are already fixed in `design.md`'s Shape / Seams section. This supersedes the seam-confirmation step of the `tdd` skill's loop: do not choose or re-derive a seam. Before each RED test, verify the seam `design.md` names still matches the actual code. A seam that is missing, wrong, or cannot carry a test is a blocker — pause to the user (following the `plain-language-writing` skill's COMMS rules), same as any other PHASE 1 blocker. MUST NOT silently substitute a different seam.
     Context files (discovery.md, proposal.md, specs, design.md) are provided - read them as needed.
     If a test keeps failing after a couple of straightforward attempts, or manual verification of a task shows unexpected behaviour with no obvious cause, MUST use the `diagnosing-bugs` skill instead of continuing to guess - it builds a reproducible feedback loop and ranked hypotheses before another fix attempt. Pause on any other blocker.
 

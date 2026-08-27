@@ -1,9 +1,9 @@
 ---
-name: dark-mode-decision-gate
+name: hrt-dark-mode-decision-gate
 description: Steel-manning resolution for tempa-spec's dark mode. Resolves findings that would normally escalate to the user (DECISION/HIGH from hrt-align-consistency-review and hrt-apply-code-review; single-reviewer UNANCHORED from hrt-adversarial-authoring). Always a fresh subagent. Use only when dark.md exists and the calling skill has a finding it cannot resolve on its own evidence.
 ---
 
-# dark-mode-decision-gate
+# hrt-dark-mode-decision-gate
 
 Resolve one escalation-worthy finding without asking the user, and log the reasoning to `dark.md` so a human can audit it later.
 

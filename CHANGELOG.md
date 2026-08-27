@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026.8.27 — 2026-08-27 (schema v12)
+
+- Adds the `hrt-change-size-gate` skill, pointed to from `proposal`'s What Changes bullet: when the draft holds two or more independent, non-dependent, non-capability-sharing slices, the agent stops and asks the user whether to split — default one change, agent never splits on its own, still escalates in dark mode
+- Adds `openspec/BACKLOG.md`, a persistent parking lot for slices deferred by that gate; `discovery` reads it as interview context, the `hrt-change-size-gate` skill writes and prunes it
+- Raises seams to a first-class `design.md` section (`## Shape / Seams`), required whenever the change adds callable code; makes `design.md` itself mandatory for every change (thin sections for a pure config/data/infra change), so `align` treats its absence as HIGH
+- Adds a `## External Dependencies` table to `proposal.md`: one row per out-of-codebase claim feasibility rests on, each needing a primary source or a completed `research` run — makes the `research`-skill trigger a structural "no" row instead of an agent judgment call, checked by `hrt-adversarial-authoring`'s Destructive Critic
+- Adds a `specs <-> seams` dimension to `align`'s consistency review (7 → 8 dimensions, always MEDIUM) and a WALKTHROUGH prompt pointing the user at the seams
+- `hrt-adversarial-authoring` reviews the new seams in its `design` pass — Structural Auditor checks each `Covers:` target exists, Destructive Critic checks the boundary choice
+- `apply` PHASE 1 now verifies the `design.md` seam against real code instead of choosing one; a mismatch is a blocker (routed to `hrt-dark-mode-decision-gate` in dark +implementation)
+- Adds an expand → migrate → contract exception to `tasks.md` for wide mechanical refactors
+- Adds the `hrt-backlog-reconcile` skill: user-invoked (`/hrt-backlog-reconcile`), reconciles `openspec/BACKLOG.md` against the shipped specs and proposes deleting covered entries — outside the pipeline, run by hand after `openspec archive`
+
 ## 2026.8.14 — 2026-08-14 (schema v11)
 
 - Gates MECHANICAL/anchored auto-resolve in `align`'s consistency review behind deterministic checks (was judgement-only)
