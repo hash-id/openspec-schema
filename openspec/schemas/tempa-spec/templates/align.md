@@ -9,7 +9,7 @@
 
 ### ALIGN
 
-<!-- One line per finding: `[MECHANICAL|DECISION] <finding> -> <fix applied | user decision | deferred>`. Omit a severity heading if it had no findings. -->
+<!-- One line per finding: `[MECHANICAL|DECISION] <finding> -> <fix applied | user decision | deferred>`. Every recorded DECISION and resolved HIGH names its source (e.g. "discovery.md > Key Decisions") so apply can jump to the exact passage. Omit a severity heading if it had no findings. -->
 
 #### HIGH
 -
@@ -18,6 +18,11 @@
 -
 
 #### LOW
+-
+
+#### Codebase claims checked
+
+<!-- One line per concrete claim design.md/tasks.md makes about existing code: `<claim> -> <verified | wrong: ...>`. On cycle 2+, only new or changed claims are re-checked; carry the rest forward from the earlier cycle. -->
 -
 
 ### VERIFY
