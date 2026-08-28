@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.8.27 — 2026-08-27 (schema v12)
+## 2026.8.28 — 2026-08-28 (schema v12)
 
 - Adds the `hrt-artifact-lint` skill (bundled zero-dependency `lint.cjs`): a deterministic structure lint — hashtag counts, checkbox format, delta headers, capability↔spec-file correspondence, `Covers:`-target existence, `design.md` section presence, unverified External Dependencies rows — with a 23-case test suite. Run from `hrt-adversarial-authoring` (before its reviewers) and `hrt-align-consistency-review` ALIGN, so a cheap model stops miscounting hashtags and grepping by hand
 - `hrt-adversarial-authoring`: its Structural Auditor now only does the structural *judgement* calls a linter cannot; the two reviewers spawn concurrently; the Destructive Critic names an overturn condition per finding; `humanizer` runs once over merged output instead of per-section
