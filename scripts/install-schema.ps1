@@ -96,32 +96,16 @@ try {
     }
 
     Write-Host "Installing skills..."
+    # One call: this repo's skills/ holds both the hrt-* skills (skills/<name>/) and
+    # skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, research, the three
+    # wshobson security skills, and humanizer - vendored from their upstreams,
+    # refreshed via scripts/vendor-skills.cjs). --full-depth makes the walk recurse
+    # into skills/vendor/ instead of stopping one level down.
     $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs research --agent '*' -y 2>&1 | Write-Host
+    "" | npx --yes skills@latest add "$Repo/skills" --full-depth --agent '*' -y 2>&1 | Write-Host
     $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install grilling/tdd/diagnosing-bugs/research from mattpocock/skills"
-        exit 1
-    }
-    $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction --agent '*' -y 2>&1 | Write-Host
-    $ErrorActionPreference = "Stop"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install security skills from wshobson/agents"
-        exit 1
-    }
-    $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add "$Repo/skills" --agent '*' -y 2>&1 | Write-Host
-    $ErrorActionPreference = "Stop"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install hrt-* skills from $Repo/skills"
-        exit 1
-    }
-    $ErrorActionPreference = "Continue"
-    "" | npx --yes skills@latest add blader/humanizer --skill humanizer --agent '*' -y 2>&1 | Write-Host
-    $ErrorActionPreference = "Stop"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Error: failed to install humanizer from blader/humanizer"
+        Write-Error "Error: failed to install skills from $Repo/skills"
         exit 1
     }
 
@@ -152,7 +136,7 @@ try {
     }
 
     Write-Host "Installed '$SchemaName' -> $Dest"
-    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing, humanizer)"
+    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, humanizer, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
     Write-Host "Set default schema -> $SchemaName ($Config)"
     Write-Host "Use it:  openspec new change <name>"
 }

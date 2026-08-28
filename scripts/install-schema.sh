@@ -72,20 +72,13 @@ done
 shopt -u nullglob
 
 echo "Installing skills..."
-npx --yes skills@latest add mattpocock/skills --skill grilling tdd diagnosing-bugs research --agent '*' -y < /dev/null || {
-  echo "Error: failed to install grilling/tdd/diagnosing-bugs/research from mattpocock/skills" >&2
-  exit 1
-}
-npx --yes skills@latest add wshobson/agents --skill stride-analysis-patterns threat-mitigation-mapping security-requirement-extraction --agent '*' -y < /dev/null || {
-  echo "Error: failed to install security skills from wshobson/agents" >&2
-  exit 1
-}
-npx --yes skills@latest add "${REPO}/skills" --agent '*' -y < /dev/null || {
-  echo "Error: failed to install hrt-* skills from ${REPO}/skills" >&2
-  exit 1
-}
-npx --yes skills@latest add blader/humanizer --skill humanizer --agent '*' -y < /dev/null || {
-  echo "Error: failed to install humanizer from blader/humanizer" >&2
+# One call: this repo's skills/ holds both the hrt-* skills (skills/<name>/) and
+# skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, research, the three
+# wshobson security skills, and humanizer — vendored from their upstreams,
+# refreshed via scripts/vendor-skills.cjs). --full-depth makes the walk recurse
+# into skills/vendor/ instead of stopping one level down.
+npx --yes skills@latest add "${REPO}/skills" --full-depth --agent '*' -y < /dev/null || {
+  echo "Error: failed to install skills from ${REPO}/skills" >&2
   exit 1
 }
 
@@ -104,6 +97,6 @@ node "$TMP/merge-config.cjs" "$CONFIG" "$SCHEMA_NAME" "$CONTEXT_MARKER" "$CONTEX
 }
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing, humanizer)"
+echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, humanizer, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

@@ -19,6 +19,7 @@
 - `apply` PHASE 1 now verifies the `design.md` seam against real code instead of choosing one; a mismatch is a blocker (routed to `hrt-dark-mode-decision-gate` in dark +implementation)
 - Adds an expand → migrate → contract exception to `tasks.md` for wide mechanical refactors
 - Adds the `hrt-backlog-reconcile` skill: user-invoked (`/hrt-backlog-reconcile`), reconciles `openspec/BACKLOG.md` against the shipped specs and proposes deleting covered entries — outside the pipeline, run by hand after `openspec archive`
+- Vendors the external skills (`grilling`, `tdd`, `diagnosing-bugs`, `research` from `mattpocock/skills`; `stride-analysis-patterns`, `threat-mitigation-mapping`, `security-requirement-extraction` from `wshobson/agents`; `humanizer` from `blader/humanizer`) into `skills/vendor/<name>/` with per-file SHA-256 pins in `skills/vendor/vendor-lock.json`. The installer drops from four `npx skills add` calls (one per source repo, four network clones, three third-party repos in the critical path) to one for this repo's `skills/`. Adds `scripts/vendor-skills.cjs` (`--check` / `--apply`) to refresh the copies from upstream, with an 11-case test suite
 
 ## 2026.8.14 — 2026-08-14 (schema v11)
 

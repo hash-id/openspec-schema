@@ -40,7 +40,7 @@ discovery -> proposal -> { specs, design } -> tasks -> align -> apply (TDD + rev
 
 ## Install (local, into the current repo)
 
-Installs `tempa-spec` into `./openspec/schemas/tempa-spec`, provisions the skills its instructions point to (via `npx skills add`), and sets it as the repo's default schema (`openspec/config.yaml`):
+Installs `tempa-spec` into `./openspec/schemas/tempa-spec`, provisions the skills its instructions point to (one `npx skills add` for this repo's `skills/` — both the local `hrt-*` skills and the vendored external ones), and sets it as the repo's default schema (`openspec/config.yaml`):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hash-id/openspec-schema/master/scripts/install-schema.sh | bash
@@ -78,8 +78,10 @@ openspec instructions apply   --change <name>
 ```
 openspec/schemas/tempa-spec/schema.yaml   workflow definition (artifacts, deps, apply)
 openspec/schemas/tempa-spec/templates/    artifact templates
-skills/                             local hrt-* skills referenced from schema.yaml
+skills/hrt-*                        local skills referenced from schema.yaml
+skills/vendor/                      external skills vendored in (grilling, tdd, ...) + vendor-lock.json
 scripts/merge-config.cjs            installer's config.yaml merger
+scripts/vendor-skills.cjs           refreshes skills/vendor/ from upstream (--check / --apply)
 scripts/install-schema.sh           local installer (no params, bash)
 scripts/install-schema.ps1          local installer (no params, PowerShell)
 ```
