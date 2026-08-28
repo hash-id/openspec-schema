@@ -6,6 +6,6 @@
     "yaml": "^2.6.0"
   },
   "scripts": {
-    "test": "node --test merge-config.test.cjs"
+    "test": "node --test merge-config.test.cjs lint.test.cjs"
   }
 }

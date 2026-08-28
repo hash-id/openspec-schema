@@ -2,6 +2,12 @@
 
 ## 2026.8.27 — 2026-08-27 (schema v12)
 
+- Adds the `hrt-artifact-lint` skill (bundled zero-dependency `lint.cjs`): a deterministic structure lint — hashtag counts, checkbox format, delta headers, capability↔spec-file correspondence, `Covers:`-target existence, `design.md` section presence, unverified External Dependencies rows — with a 23-case test suite. Run from `hrt-adversarial-authoring` (before its reviewers) and `hrt-align-consistency-review` ALIGN, so a cheap model stops miscounting hashtags and grepping by hand
+- `hrt-adversarial-authoring`: its Structural Auditor now only does the structural *judgement* calls a linter cannot; the two reviewers spawn concurrently; the Destructive Critic names an overturn condition per finding; `humanizer` runs once over merged output instead of per-section
+- Adds the `hrt-dark-mode-routing` skill: single source of truth for where a dark-mode finding goes. The per-phase carve-out paragraphs in `proposal`/`specs`/`design`/`align`/`apply` collapse to one pointer line each
+- `discovery` interview convergence is an explicit checklist (every decision has a rationale + rejected alternative, every outcome/assumption/open-question recorded, user confirms in their own words) instead of an open-ended "until the user confirms"
+- `hrt-align-consistency-review`: VERIFY is skipped when ALIGN raised no HIGH/MEDIUM and the lint ran clean; after 3 cycles the loop asks the user whether to continue (checkpoint, not a cap); each recorded decision and resolved HIGH gets a source pointer (doc + section)
+- `apply` reads `align.md` + `tasks.md` as binding primary context, following each align.md entry's source pointer to the exact passage instead of re-reading the other four artifacts whole
 - Adds the `hrt-change-size-gate` skill, pointed to from `proposal`'s What Changes bullet: when the draft holds two or more independent, non-dependent, non-capability-sharing slices, the agent stops and asks the user whether to split — default one change, agent never splits on its own, still escalates in dark mode
 - Adds `openspec/BACKLOG.md`, a persistent parking lot for slices deferred by that gate; `discovery` reads it as interview context, the `hrt-change-size-gate` skill writes and prunes it
 - Raises seams to a first-class `design.md` section (`## Shape / Seams`), required whenever the change adds callable code; makes `design.md` itself mandatory for every change (thin sections for a pure config/data/infra change), so `align` treats its absence as HIGH

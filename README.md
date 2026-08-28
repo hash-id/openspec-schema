@@ -79,6 +79,7 @@ openspec instructions apply   --change <name>
 openspec/schemas/tempa-spec/schema.yaml   workflow definition (artifacts, deps, apply)
 openspec/schemas/tempa-spec/templates/    artifact templates
 skills/                             local hrt-* skills referenced from schema.yaml
+scripts/merge-config.cjs            installer's config.yaml merger
 scripts/install-schema.sh           local installer (no params, bash)
 scripts/install-schema.ps1          local installer (no params, PowerShell)
 ```
