@@ -15,7 +15,7 @@ artifacts:
 
       If shared understanding depends on a fact about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that fact isn't already known with confidence, MUST use the `research` skill to verify it against primary sources before asking the user or writing it into discovery.md as settled. Skip this for facts fully answerable from the codebase itself.
 
-      discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions.
+      discovery.md has a scope grilling doesn't know about: the problem statement, what changes, capabilities, and impact are written into proposal.md (next phase) - do NOT duplicate them here. discovery.md records ONLY what proposal and design omit: scope and direction decisions with rationale and rejected alternatives, desired outcomes, assumptions, and open questions. Technical decisions and their rejected alternatives do NOT go here - they live in design.md's Decisions section.
 
       The interview has converged only when every scope/direction decision has a rationale and a named rejected alternative, every desired outcome and assumption is written down, every open question is answered or recorded as still open, AND the user has confirmed shared understanding in their own words. Do not infer confirmation from silence or from a single answer.
       Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST follow the `plain-language-writing` skill's COMMS rules.
@@ -126,16 +126,16 @@ artifacts:
       Create the design document that explains HOW to implement the change. design.md is MANDATORY for every change - always create it. Depth varies: a cross-cutting change, a new dependency, security/performance/migration complexity, or design ambiguity means full sections; a pure config/data/infra change means thin sections and a one-line "no new code surface" in Shape / Seams. A section that does not apply gets a one-line "N/A - <reason>", never removal.
 
       Sections:
-      - **Context**: Background, current state, constraints, stakeholders
-      - **Goals / Non-Goals**: What this design achieves and explicitly excludes
-      - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision.
+      - **Context**: Only the current state and constraints the approach needs. Reference the proposal for motivation instead of restating it (e.g. "See proposal.md - Why").
+      - **Goals / Non-Goals**: What this design achieves and explicitly excludes. Do NOT restate the proposal's scope - add only design-level boundaries.
+      - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision. This section is the SOLE home for rejected technical alternatives - discovery.md's Key Decisions carries scope and direction decisions only, not technical ones.
       - **Shape / Seams**: required whenever the change introduces callable code. List each seam — the public boundary where `apply`'s tests will attach. For each: its signature, and which spec requirement or scenario has its tests attached there (`Covers: <name>`). Prefer boundaries that already exist in the codebase (explore for them, per `context:`'s rules); add a new seam only when no existing boundary fits, and say why. Skip this section with a one-line note ("no new code surface") only for pure config, data, or infra changes.
       - **Risks / Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
       - **Open Questions**: Outstanding decisions or unknowns to resolve
 
       Focus on architecture and approach, not line-by-line implementation - the Shape / Seams section above is the one exception, scoped to signatures and file layout, not function bodies.
-      Reference the proposal for motivation and specs for requirements.
+      Reference the proposal for motivation and specs for requirements - if a section would only restate them, point to them instead.
 
       Good design docs explain the "why" behind technical decisions.
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-<!-- Background and current state -->
+<!-- Current state and constraints the approach needs. Reference proposal.md - Why for motivation; do not restate it. -->
 
 ## Goals / Non-Goals
 
@@ -10,11 +10,11 @@
 <!-- What this design aims to achieve -->
 
 **Non-Goals:**
-<!-- What is explicitly out of scope -->
+<!-- Design-level boundaries only; do not restate the proposal's scope -->
 
 ## Decisions
 
-<!-- Key design decisions and rationale -->
+<!-- Key technical decisions and rationale. This is the sole home for rejected technical alternatives - list them per decision. -->
 
 ## Shape / Seams
 
