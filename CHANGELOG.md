@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased (schema v12)
+## 2026.9.10 — 2026-09-10 (schema v12)
 
 - `hrt-adversarial-authoring` and `hrt-align-consistency-review` gain a **consequence gate**: a finding is only actionable (`## Required Changes` / HIGH / MEDIUM) if it names the concrete thing a reader or implementer hits when it goes unfixed. Strength-of-argument critique that names no consequence drops to the existing non-blocking batch — `## Suggested Improvements` in `hrt-adversarial-authoring`, LOW DECISION findings in `hrt-align-consistency-review` — shown to the user once, never a per-item question
 - Both review skills now treat "defer it / note it / accept the drift" as a non-alternative (it does not make a finding a genuine user decision), and neither auto-resolves a finding just because a clean fix exists when a competent author could reasonably pick a different remedy
 - The `specs` and `design` adversarial reviewers no longer re-open a premise `proposal.md` settled — a genuine premise error goes to Risks / Open Questions, not a Required Change. The `hrt-adversarial-authoring` step-3 lane note names which lens owns what
 - `hrt-align-consistency-review`: VERIFY no longer skips on a LOW DECISION finding (only pure MECHANICAL + clean lint skips), and its fresh-context pass explicitly re-checks whether a finding ALIGN placed at LOW should be HIGH/MEDIUM — so the consequence gate cannot quietly demote a real issue past the independent recheck
+- `design` instruction: restores upstream's anti-restatement guards on Context and Goals/Non-Goals (dropped in v12's rewrite) so `design.md` points at the proposal instead of re-telling its problem statement and scope. Dedups `discovery` vs `design` — `design.md`'s Decisions is the sole home for rejected technical alternatives, `discovery.md`'s Key Decisions carries scope/direction decisions only; templates updated to match
 - Research: `docs/research/2026-09-09-technical-writing-adversarial-drafting-skills.md` (ecosystem pass behind these changes) and `docs/research/2026-09-07-llm-as-judge-reliability-2026.md`
 
 ## 2026.8.28 — 2026-08-28 (schema v12)
