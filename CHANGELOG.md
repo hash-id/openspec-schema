@@ -1,9 +1,17 @@
 # Changelog
 
+## Unreleased (schema v12)
+
+- `hrt-adversarial-authoring` and `hrt-align-consistency-review` gain a **consequence gate**: a finding is only actionable (`## Required Changes` / HIGH / MEDIUM) if it names the concrete thing a reader or implementer hits when it goes unfixed. Strength-of-argument critique that names no consequence drops to the existing non-blocking batch — `## Suggested Improvements` in `hrt-adversarial-authoring`, LOW DECISION findings in `hrt-align-consistency-review` — shown to the user once, never a per-item question
+- Both review skills now treat "defer it / note it / accept the drift" as a non-alternative (it does not make a finding a genuine user decision), and neither auto-resolves a finding just because a clean fix exists when a competent author could reasonably pick a different remedy
+- The `specs` and `design` adversarial reviewers no longer re-open a premise `proposal.md` settled — a genuine premise error goes to Risks / Open Questions, not a Required Change. The `hrt-adversarial-authoring` step-3 lane note names which lens owns what
+- `hrt-align-consistency-review`: VERIFY no longer skips on a LOW DECISION finding (only pure MECHANICAL + clean lint skips), and its fresh-context pass explicitly re-checks whether a finding ALIGN placed at LOW should be HIGH/MEDIUM — so the consequence gate cannot quietly demote a real issue past the independent recheck
+- Research: `docs/research/2026-09-09-technical-writing-adversarial-drafting-skills.md` (ecosystem pass behind these changes) and `docs/research/2026-09-07-llm-as-judge-reliability-2026.md`
+
 ## 2026.8.28 — 2026-08-28 (schema v12)
 
 - Adds the `hrt-artifact-lint` skill (bundled zero-dependency `lint.cjs`): a deterministic structure lint — hashtag counts, checkbox format, delta headers, capability↔spec-file correspondence, `Covers:`-target existence, `design.md` section presence, unverified External Dependencies rows — with a 23-case test suite. Run from `hrt-adversarial-authoring` (before its reviewers) and `hrt-align-consistency-review` ALIGN, so a cheap model stops miscounting hashtags and grepping by hand
-- `hrt-adversarial-authoring`: its Structural Auditor now only does the structural *judgement* calls a linter cannot; the two reviewers spawn concurrently; the Destructive Critic names an overturn condition per finding; `humanizer` runs once over merged output instead of per-section
+- `hrt-adversarial-authoring`: its Structural Auditor now only does the structural _judgement_ calls a linter cannot; the two reviewers spawn concurrently; the Destructive Critic names an overturn condition per finding; `humanizer` runs once over merged output instead of per-section
 - Adds the `hrt-dark-mode-routing` skill: single source of truth for where a dark-mode finding goes. The per-phase carve-out paragraphs in `proposal`/`specs`/`design`/`align`/`apply` collapse to one pointer line each
 - `discovery` interview convergence is an explicit checklist (every decision has a rationale + rejected alternative, every outcome/assumption/open-question recorded, user confirms in their own words) instead of an open-ended "until the user confirms"
 - `hrt-align-consistency-review`: VERIFY is skipped when ALIGN raised no HIGH/MEDIUM and the lint ran clean; after 3 cycles the loop asks the user whether to continue (checkpoint, not a cap); each recorded decision and resolved HIGH gets a source pointer (doc + section)
