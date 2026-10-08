@@ -6,11 +6,11 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
       "sourcePath": "skills/productivity/grilling",
       "license": "MIT",
       "files": {
-        "SKILL.md": "10ff989e7498b23b5acb49d5048f11dcd906757d2f79c5cdf8a00001381296f2",
+        "SKILL.md": "befdff1e27a1dfe2a294d5871169ac1afe16d983911daa4f32627514a48c1e15",
         "agents/openai.yaml": "1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b"
       }
     },
@@ -18,11 +18,11 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
       "sourcePath": "skills/engineering/tdd",
       "license": "MIT",
       "files": {
-        "SKILL.md": "cb01f66bebfaa25fa1f88e6b7e769cd9fd9f35b1120b8563749820738814c927",
+        "SKILL.md": "5505d25bbaa8fc14a79e4d20163936958992a2995b7f1dd1d6197edc9ed722e0",
         "agents/openai.yaml": "ea6f01cf1b8c06a4b0f5b649d74b1b8ce8685e72af1b38d70d877693e092af0b",
         "mocking.md": "3ceb807fdf4a47d6a93d4d9a891e5ba6d362a6247bd08adc451feebfc17361ef",
         "tests.md": "859f9e592c188fda4fc7277dd180e4ce9c7a2e13f6efe1f6f29eccc9d28c106a"
@@ -32,11 +32,11 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
       "sourcePath": "skills/engineering/diagnosing-bugs",
       "license": "MIT",
       "files": {
-        "SKILL.md": "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84",
+        "SKILL.md": "849198df88cdb65fd0d97236604c1fca7ff2f22d2f705f9724a800d0266b118d",
         "agents/openai.yaml": "3e430dbe4334a87597488c060cb3dc3786bb00c9182877d6f5ec41f62490e90b",
         "scripts/hitl-loop.template.sh": "35103539fc36873eea36074769ad454f9379d6fc8b2dc0e26ce987fd3bfe5503"
       }
@@ -45,7 +45,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "6654f6b60cd9d5be8b54c6fafe44346dabeb3b76",
+      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
       "sourcePath": "skills/engineering/research",
       "license": "MIT",
       "files": {

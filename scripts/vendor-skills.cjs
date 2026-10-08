@@ -6,6 +6,7 @@
 //   node scripts/vendor-skills.cjs            # same as --check
 //   node scripts/vendor-skills.cjs --check    # report drift, exit 1 if any
 //   node scripts/vendor-skills.cjs --apply    # pull upstream, rewrite vendor-lock.json
+//   ... --source mattpocock/skills            # limit either mode to one upstream repo
 //
 // The vendored copies are the source of truth the installer ships downstream
 // (one `npx skills add <repo>/skills` call picks them up alongside the hrt-*
@@ -149,21 +150,28 @@ function shallowClone(source, ref, destParent) {
 
 function run() {
   const mode = process.argv.includes("--apply") ? "apply" : "check";
+  const srcIdx = process.argv.indexOf("--source");
+  const onlySource = srcIdx === -1 ? null : process.argv[srcIdx + 1];
+  if (srcIdx !== -1 && !onlySource) throw new Error("--source needs a repo, e.g. mattpocock/skills");
   const lock = readLock(LOCK_PATH);
+  const selected = Object.entries(lock.skills).filter(
+    ([, entry]) => !onlySource || entry.source === onlySource
+  );
+  if (!selected.length) throw new Error(`no vendored skill has source ${onlySource}`);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vendor-skills-"));
   let drift = false;
 
   try {
     // clone each distinct source repo once
     const clones = new Map();
-    for (const entry of Object.values(lock.skills)) {
+    for (const [, entry] of selected) {
       const key = `${entry.source}@${entry.sourceRef}`;
       if (!clones.has(key)) {
         clones.set(key, shallowClone(entry.source, entry.sourceRef, tmp));
       }
     }
 
-    for (const [name, entry] of Object.entries(lock.skills)) {
+    for (const [name, entry] of selected) {
       const vendoredDir = path.join(VENDOR_DIR, name);
       const cloneDir = clones.get(`${entry.source}@${entry.sourceRef}`);
       const upstreamHead = git(["rev-parse", "HEAD"], cloneDir);
