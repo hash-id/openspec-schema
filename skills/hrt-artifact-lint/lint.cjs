@@ -4,7 +4,7 @@
 // cheap one - does slowly and unreliably: hashtag counts, checkbox format,
 // delta-operation headers, capability <-> spec-file correspondence,
 // Covers: target existence, design.md section presence, unverified
-// External Dependencies rows.
+// External Dependencies rows, tasks.md group graph (Depends on).
 //
 // It does NOT make judgement calls (is this scenario really behaviour? is
 // this requirement testable?) - those stay with the review subagents.
@@ -399,6 +399,77 @@ function sectionBodies(ls) {
 // tasks.md
 // ---------------------------------------------------------------------------
 
+// Blank out HTML comments but keep their newlines, so line numbers stay right.
+function stripComments(text) {
+  return text.replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ""));
+}
+
+// Group graph: "Depends on:" lines under a "## N." heading.
+// A group with no "Depends on:" depends on the previous group (apply runs in order).
+function lintTaskGraph(file, text) {
+  const ls = lines(stripComments(text));
+  const groups = [];
+  let cur = null;
+  for (let i = 0; i < ls.length; i++) {
+    const n = i + 1;
+    const h = ls[i].match(/^##\s+(\d+)\.(?:\s|$)/);
+    if (h) {
+      cur = { id: Number(h[1]), line: n, deps: null, open: true };
+      groups.push(cur);
+      continue;
+    }
+    if (/^##\s/.test(ls[i])) {
+      cur = null;
+      continue;
+    }
+    if (!cur) continue;
+    // metadata only counts before the group's first checkbox; later lines are prose
+    if (/^\s*[-*]\s*\[[ xX]\]/.test(ls[i])) cur.open = false;
+    if (!cur.open) continue;
+    const m = ls[i].match(/^(Depends on):\s*(.*?)\s*$/i);
+    if (!m) continue;
+    if (/^none$/i.test(m[2])) {
+      cur.deps = [];
+    } else if (/^\d+(\s*,\s*\d+)*$/.test(m[2])) {
+      cur.deps = m[2].split(",").map((x) => Number(x.trim()));
+    } else {
+      err(file, n, '"Depends on:" must be "none" or a comma-separated list of group numbers');
+    }
+  }
+  if (!groups.some((g) => g.deps)) return;
+
+  const ids = new Set(groups.map((g) => g.id));
+  for (const g of groups) {
+    for (const d of g.deps || []) {
+      if (d === g.id) err(file, g.line, `group ${g.id} depends on itself`);
+      else if (!ids.has(d)) err(file, g.line, `group ${g.id} depends on unknown group ${d}`);
+    }
+  }
+
+  // effective deps: declared, else the previous group in document order
+  const eff = new Map();
+  groups.forEach((g, i) => {
+    const declared = (g.deps || []).filter((d) => ids.has(d) && d !== g.id);
+    eff.set(g.id, g.deps ? declared : i > 0 ? [groups[i - 1].id] : []);
+  });
+
+  // cycle check (DFS)
+  const state = new Map();
+  let cyclic = false;
+  const visit = (id) => {
+    if (state.get(id) === 2) return;
+    if (state.get(id) === 1) { cyclic = true; return; }
+    state.set(id, 1);
+    for (const d of eff.get(id)) visit(d);
+    state.set(id, 2);
+  };
+  for (const g of groups) visit(g.id);
+  if (cyclic) {
+    err(file, groups[0].line, "dependency cycle between task groups - apply could never schedule them");
+    return;
+  }
+}
+
 function lintTasks(file, text) {
   const ls = lines(text);
   let currentHeading = null;
@@ -517,6 +588,7 @@ if (tasksText == null) {
   err("tasks.md", 0, "tasks.md not found in change dir");
 } else {
   lintTasks("tasks.md", tasksText);
+  lintTaskGraph("tasks.md", tasksText);
 }
 
 // ---------------------------------------------------------------------------

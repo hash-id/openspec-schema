@@ -128,7 +128,7 @@ artifacts:
       Sections:
       - **Context**: Only the current state and constraints the approach needs. Reference the proposal for motivation instead of restating it (e.g. "See proposal.md - Why").
       - **Goals / Non-Goals**: What this design achieves and explicitly excludes. Do NOT restate the proposal's scope - add only design-level boundaries.
-      - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision. This section is the SOLE home for rejected technical alternatives - discovery.md's Key Decisions carries scope and direction decisions only, not technical ones.
+      - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered for each decision. This section is the SOLE home for rejected technical alternatives - discovery.md's Key Decisions carries scope and direction decisions only, not technical ones. When the current shape of the code makes a slice hard to build or test, record the prefactor that fixes it as a Decision here (what changes shape, why, which slice needs it); `tasks` turns it into an early group.
       - **Shape / Seams**: required whenever the change introduces callable code. List each seam — the public boundary where `apply`'s tests will attach. For each: its signature, and which spec requirement or scenario has its tests attached there (`Covers: <name>`). Prefer boundaries that already exist in the codebase (explore for them, per `context:`'s rules); add a new seam only when no existing boundary fits, and say why. Skip this section with a one-line note ("no new code surface") only for pure config, data, or infra changes.
       - **Risks / Trade-offs**: Known limitations, things that could go wrong. Format: [Risk] → Mitigation
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
@@ -160,13 +160,23 @@ artifacts:
 
       Guidelines:
       - Group related tasks under ## numbered headings
-      - Each heading MUST group tasks that together produce one demoable or verifiable slice - ask what can you demo or verify when everything under this heading is done? A heading with no answer is a horizontal slice (e.g. grouped by architectural layer instead of by behavior) - regroup around behavior instead (exception: wide refactors — see below)
+      - Each heading MUST group tasks that together produce one demoable or verifiable slice - ask what can you demo or verify when everything under this heading is done? A heading with no answer is a horizontal slice (e.g. grouped by architectural layer instead of by behavior) - regroup around behavior instead (exceptions: wide refactors and prefactors — see below)
       - Each task MUST be a checkbox: `- [ ] X.Y Task description`
       - Tasks should be small enough to complete in one session
       - Order tasks by dependency (what must be done first?)
       - Note blocking relationships explicitly where non-obvious (e.g. "blocked by 1.2")
 
+      **Parallel apply (optional, declared here, never at apply time).** `apply` runs groups in order unless this file says otherwise. To let independent groups run at the same time, add one plain line directly under a group's heading, before its first checkbox:
+      ```
+      Depends on: none          (or: 1, 2 - the group numbers it needs finished first)
+      ```
+      - A group with no such line depends on the group before it, so order is kept. Write the line only on groups that should start early or wait for several groups.
+      - List a group only when this one needs that group's code or tests to exist; a slice that extends another slice always depends on it. Independent groups must not edit the same files. To decide that, list the files each group will change (from `design.md`'s Shape / Seams and by exploring the codebase), but do not write the list into this file. If two slices would both edit a shared file, use the prefactor exception below so they depend on that edit. A missing edge between groups that share work is the dangerous mistake (a race), so when unsure, add the dependency.
+      Most changes need none of this. Add it only where two or more groups are truly independent and the saved time is worth the extra line.
+
       **Wide-refactor exception.** If `design.md` identifies the change as a mechanical edit repeated across many call sites (a rename, a retype, a signature change) where no vertical slice can be demoed as a feature, the demoability-per-heading rule does not apply. Use expand → migrate → contract as sequential headings: `## 1. Expand` (new form added alongside the old), `## 2. Migrate call sites` (in batches; may span several headings), `## 3. Contract` (remove the old form). "Verifiable" for these headings means the test suite stays green, not that a new behavior is visible.
+
+      **Prefactor exception.** If `design.md` records a Decision that the current shape of the code makes a slice hard to build or test ("make the change easy, then make the easy change"), put that prefactor first as its own group, and make the slices that need it depend on it. A prefactor changes structure only, never behavior, and "verifiable" for it means the test suite stays green. Keep it to what the listed slices need: a prefactor with no slice that depends on it is scope creep, drop it. The same applies to a shared edit that independent slices would otherwise both make (a router, a schema, shared types).
 
       Where specs (`specs/**/*.md`) define WHEN/THEN scenarios covering both expected and failure behavior, and design.md's Risks/Trade-offs section defines `[Threat] → Mitigation` entries, each MUST trace to at least one task: a scenario or threat with no corresponding task is a coverage gap, not something for `tasks` to silently drop. 
       Tasks tracing to a negative scenario or a threat mitigation SHOULD be tagged distinctly (e.g. a trailing `[negative]` / `[security]` marker) so `align` and the apply-phase review can check coverage without re-deriving it. Keep this lightweight - traceability existing is the MUST, not one-checkbox-per-scenario cardinality.
@@ -218,7 +228,7 @@ apply:
     MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
 
     FIRST, check `dark.md`:
-    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 3, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
+    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1 to completion across all pending tasks - do NOT spawn a new subagent per task (that one subagent is the PHASE 1 orchestrator, and spawns group subagents itself only when PHASE 1 schedules parallel groups below; if it cannot spawn subagents, it runs every group in order). Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 3, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
     - Exists, header = planning-only -> STOP. Do not run apply in this session. Tell the user planning-only dark mode ends at WALKTHROUGH; apply happens elsewhere.
     - Does not exist -> proceed to PHASE 0 below, unchanged.
 
@@ -227,13 +237,20 @@ apply:
 
     Three phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation, then write the MR BRIEF. Do NOT start the review until every task is [x].
 
-    PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time):
+    PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time within a group):
     MUST use the `tdd` skill for seam confirmation, the RED/GREEN loop, and the anti-patterns to avoid (implementation-coupled tests, tautological tests, horizontal slicing). For each pending checkbox task, follow the skill's loop, then tick the checkbox to [x] and move to the next task.
     Override: unlike the `tdd` skill's default (which defers refactoring to the `code-review` review stage), REFACTOR stays inside this loop as step 3 (only while GREEN, never while RED) - tick the checkbox only after it.
     **Seam override.** Seams are already fixed in `design.md`'s Shape / Seams section. This supersedes the seam-confirmation step of the `tdd` skill's loop: do not choose or re-derive a seam. Before each RED test, verify the seam `design.md` names still matches the actual code. A seam that is missing, wrong, or cannot carry a test is a blocker — pause to the user (following the `plain-language-writing` skill's COMMS rules), same as any other PHASE 1 blocker. MUST NOT silently substitute a different seam.
     Context files are provided - follow the Read order above (align.md and tasks.md binding, the rest for gaps).
     If a test keeps failing after a couple of straightforward attempts, or manual verification of a task shows unexpected behaviour with no obvious cause, MUST use the `diagnosing-bugs` skill instead of continuing to guess - it builds a reproducible feedback loop and ranked hypotheses before another fix attempt. Pause on any other blocker.
     Keep each task's RED output (test name and its failure line) so PHASE 3 can quote it as evidence.
+
+    **Scheduling groups.** Read each group's `Depends on:` line in `tasks.md` (written by the `tasks` phase). A group with no `Depends on:` depends on the group before it. Parallel apply is never the default: it happens only when `tasks.md` declares at least one group that can start before the group before it finishes, and the user confirms below. If the lines are malformed or cyclic, run groups in order exactly as above - do not infer dependencies yourself.
+    Otherwise schedule with a rolling frontier: the frontier is every unfinished group whose dependencies are all done. Whenever a group finishes (and at the start), start frontier groups until the concurrency limit is reached. Do not wait for unrelated running groups to finish first. Concurrency limit: read logical cores and available memory with whatever the platform offers (for example `nproc` and `MemAvailable` in `/proc/meminfo`, or `sysctl hw.ncpu` and `vm_stat` on macOS). limit = min(floor(cores / 3), floor(available GB / 2)). If the reading fails or limit < 2, run in order. Never run more groups at once than limit.
+    Before the first parallel start, show the user the group graph as ASCII art: groups side by side can overlap, an arrow means "waits for" (for example `[1] [2]  ->  [3]`). Then say these groups can run concurrently with a limit of N, give the two numbers behind N, and ask whether to run concurrently or in order. Do not list the groups in prose, the graph is the list. Wait for the answer. A number from the user means concurrent at that number. Run in order unless the user chooses concurrent. This question MUST follow the `plain-language-writing` skill's COMMS rules. In dark mode (+implementation) do not ask: run in order.
+    Each group subagent: runs this PHASE 1 loop for its own tasks only; runs only the tests it wrote or changed for its own tasks, never the whole suite; does not tick checkboxes and does not commit. It reports back its RED output (test name and failure line), the files it changed, and its test result.
+    Declared dependencies are the only isolation, so check them while running. If two groups that ran at the same time report changing the same file, or a group's test fails in code it did not change (another group's unfinished work, or a build over the whole tree), the graph in `tasks.md` is missing an edge. Start nothing new, let running groups finish, re-run the affected group alone at a quiet point, and tell the user which two groups need a `Depends on:` line.
+    The orchestrator ticks the checkboxes for finished tasks. It runs the full test suite only at a quiet point, when no group is running: before starting a group that must run alone, and after the last group. With one shared working tree, a suite run beside running groups would see their half-finished code. If the full suite fails, use the `diagnosing-bugs` skill before starting anything else. A failed group does not stop groups already running, but groups depending on it do not start.
 
     PHASE 2 - REVIEW (only once every task is [x]):
     MUST use the `hrt-apply-code-review` skill to review the implemented code against specs/**/*.md, design.md, and tasks.md, resolving findings before the change is considered done.

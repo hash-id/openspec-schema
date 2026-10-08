@@ -283,6 +283,81 @@ test("non-checkbox bullet under a task heading is a WARN", () => {
   assert.match(r.out, /not a "- \[ \]" checkbox/);
 });
 
+// --- tasks.md parallel metadata (Depends on) -------------
+
+const PAR_TASKS = `## 1. Core
+
+Depends on: none
+
+- [ ] 1.1 Build core
+
+## 2. Reports
+
+Depends on: none
+
+- [ ] 2.1 Build reports
+
+## 3. Wire up
+
+Depends on: 1, 2
+
+- [ ] 3.1 Wire both
+`;
+
+function tasksChange(tasks) {
+  return goodChange({ "tasks.md": tasks });
+}
+
+test("valid Depends on metadata lints clean", () => {
+  const r = run(tasksChange(PAR_TASKS));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /tasks\.md/);
+});
+
+test("Depends on an unknown group is an ERROR", () => {
+  const r = run(tasksChange(PAR_TASKS.replace("Depends on: 1, 2", "Depends on: 1, 9")));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /unknown group 9/);
+});
+
+test("group depending on itself is an ERROR", () => {
+  const r = run(tasksChange(PAR_TASKS.replace("Depends on: 1, 2", "Depends on: 3")));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /depends on itself/);
+});
+
+test("dependency cycle is an ERROR", () => {
+  const r = run(
+    tasksChange(PAR_TASKS.replace("## 1. Core\n\nDepends on: none", "## 1. Core\n\nDepends on: 3"))
+  );
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /dependency cycle/);
+});
+
+test("malformed Depends on value is an ERROR", () => {
+  const r = run(tasksChange(PAR_TASKS.replace("Depends on: 1, 2", "Depends on: the others")));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /"Depends on:" must be "none" or a comma-separated list of group numbers/);
+});
+
+test("metadata-looking line after the first checkbox is prose, not graph metadata", () => {
+  const r = run(
+    tasksChange(GOOD_TASKS.replace("- [ ] 1.2 Wire export command\n", "- [ ] 1.2 Wire export command\nDepends on: the legacy exporter\n"))
+  );
+  assert.strictEqual(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /Depends on/);
+});
+
+test("metadata inside an HTML comment is ignored", () => {
+  const r = run(
+    tasksChange(
+      GOOD_TASKS.replace("## 1. Export CSV for a single table\n", "## 1. Export CSV for a single table\n<!--\nDepends on: 7\n-->\n")
+    )
+  );
+  assert.strictEqual(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /unknown group/);
+});
+
 test("unverified External Dependencies row is an ERROR", () => {
   const r = run(
     goodChange({
