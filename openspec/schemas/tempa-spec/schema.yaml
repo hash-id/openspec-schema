@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 12
+version: 13
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: discovery
