@@ -218,14 +218,14 @@ apply:
     MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
 
     FIRST, check `dark.md`:
-    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 2, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
+    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1's loop to completion across all pending tasks - do NOT spawn a new subagent per task. Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 3, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
     - Exists, header = planning-only -> STOP. Do not run apply in this session. Tell the user planning-only dark mode ends at WALKTHROUGH; apply happens elsewhere.
     - Does not exist -> proceed to PHASE 0 below, unchanged.
 
     PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement.
     This stop message and any blocker/pause message in PHASE 1 below MUST follow the `plain-language-writing` skill's COMMS rules.
 
-    Two phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation. Do NOT start the review until every task is [x].
+    Three phases after that: first IMPLEMENT every task with strict TDD, then REVIEW the implementation, then write the MR BRIEF. Do NOT start the review until every task is [x].
 
     PHASE 1 - IMPLEMENT (strict TDD, ONE task at a time):
     MUST use the `tdd` skill for seam confirmation, the RED/GREEN loop, and the anti-patterns to avoid (implementation-coupled tests, tautological tests, horizontal slicing). For each pending checkbox task, follow the skill's loop, then tick the checkbox to [x] and move to the next task.
@@ -233,6 +233,10 @@ apply:
     **Seam override.** Seams are already fixed in `design.md`'s Shape / Seams section. This supersedes the seam-confirmation step of the `tdd` skill's loop: do not choose or re-derive a seam. Before each RED test, verify the seam `design.md` names still matches the actual code. A seam that is missing, wrong, or cannot carry a test is a blocker — pause to the user (following the `plain-language-writing` skill's COMMS rules), same as any other PHASE 1 blocker. MUST NOT silently substitute a different seam.
     Context files are provided - follow the Read order above (align.md and tasks.md binding, the rest for gaps).
     If a test keeps failing after a couple of straightforward attempts, or manual verification of a task shows unexpected behaviour with no obvious cause, MUST use the `diagnosing-bugs` skill instead of continuing to guess - it builds a reproducible feedback loop and ranked hypotheses before another fix attempt. Pause on any other blocker.
+    Keep each task's RED output (test name and its failure line) so PHASE 3 can quote it as evidence.
 
     PHASE 2 - REVIEW (only once every task is [x]):
     MUST use the `hrt-apply-code-review` skill to review the implemented code against specs/**/*.md, design.md, and tasks.md, resolving findings before the change is considered done.
+
+    PHASE 3 - MR BRIEF (only once PHASE 2 has finished):
+    MUST use the `hrt-mr-brief` skill to write `mr-brief.md` next to `tasks.md`, for the reviewer. The user commits it with the code and posts its content as a review comment themselves; do not run any git or review-system command.
