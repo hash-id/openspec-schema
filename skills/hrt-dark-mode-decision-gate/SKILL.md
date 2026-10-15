@@ -10,7 +10,7 @@ Resolve one escalation-worthy finding without asking the user, and log the reaso
 ## When this runs
 - `hrt-align-consistency-review` / `hrt-apply-code-review`: DECISION and HIGH findings only. MECHANICAL is fixed directly by the caller, never reaches this skill.
 - `hrt-adversarial-authoring`: a single-reviewer UNANCHORED finding only. ANCHORED, or both reviewers agree, auto-resolves in the caller and never reaches this skill.
-- MUST NOT run on a finding that is a security requirement or mitigation already decided by `stride-analysis-patterns` / `threat-mitigation-mapping` / `security-requirement-extraction` — that decision is a hard constraint, not an opposing case to weigh. Escalate those to the user even in dark mode.
+- MUST NOT run on a finding that is a security requirement or mitigation already decided by `hrt-security-pass` — that decision is a hard constraint, not an opposing case to weigh. Escalate those to the user even in dark mode.
 
 ## Fresh subagent, always
 Caller MUST spawn a fresh subagent with no memory of the session that produced the finding. Give it only: the finding, and the grounding artifacts needed to evaluate it (discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md, align.md as relevant; code and test output if called from `apply`). MUST NOT run inline in the calling session's own context — a same-context steel-man reuses the reasoning that produced the original recommendation instead of opposing it.

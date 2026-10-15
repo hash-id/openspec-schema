@@ -73,6 +73,7 @@ Show a before and after for the behaviour that matters most, not for every task.
 - If the Phase 1 RED output was not recorded, write `Before: not recorded` for that item. Never reconstruct a failure.
 - Screenshots count as stronger evidence when the change is visual and the environment can take them. They cannot go into a text file, so name where the user should attach them. Do not fake one.
 - Include the final result of the full suite on one line (pass count, fail count).
+- Name the security scanners `apply` ran and their result in one line, or write `no scanner configured`. Never imply a scan happened that did not.
 
 ### Merge Danger
 

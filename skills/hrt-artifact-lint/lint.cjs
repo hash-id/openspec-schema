@@ -380,6 +380,32 @@ function lintDesign(file, text, specCoversNames) {
   }
 }
 
+// Security gate (WARN only): proposal/specs mention a trust-boundary keyword but
+// design.md's Risks / Trade-offs has neither a "[Threat ...]" entry nor a
+// "Security pass: skipped - <reason>" line. Also checks each threat line carries
+// "[Threat: <category>, <High|Medium|Low>]". Keywords are a deliberate nudge, not
+// a proof: the judgement of whether the boundary is real stays with align.
+const TRUST_KEYWORDS = /\b(authenticat\w*|authoriz\w*|login|password|passphrase|credential\w*|api[ -]key|oauth|sso|jwt|bearer|(?:access|auth|refresh|session|api) token|session (?:id|cookie|fixation)|cookie|secrets?|privilege\w*|upload\w*|deserializ\w*|webhook\w*|pii|personal data|encrypt\w*|untrusted|llm|prompt injection)\b/gi;
+
+function lintSecurityGate(file, designText, planText) {
+  const hits = [...new Set([...stripComments(planText).matchAll(TRUST_KEYWORDS)].map((m) => m[0].toLowerCase()))];
+  if (!hits.length) return;
+  const risks = sectionBodies(lines(stripComments(designText)))["Risks / Trade-offs"] || "";
+  const threatLines = risks.split(/\r?\n/).filter((l) => /\[Threat\b/.test(l));
+  const skipped = /Security pass:\s*skipped\s*-\s*\S.{7,}/i.test(risks);
+  if (!threatLines.length && !skipped) {
+    warn(file, 0, `possible trust boundary (matched: ${hits.slice(0, 5).join(", ")}) but Risks / Trade-offs has no "[Threat: <category>, <severity>] →" entry and no "Security pass: skipped - <reason>" line`);
+  }
+  if (skipped && threatLines.length) {
+    warn(file, 0, 'Risks / Trade-offs has both a "Security pass: skipped" line and "[Threat" entries - pick one');
+  }
+  for (const l of threatLines) {
+    if (!/\[Threat:\s*[^,\]]+,\s*(High|Medium|Low)\s*\]/i.test(l)) {
+      warn(file, 0, `threat line should read "[Threat: <category>, <High|Medium|Low>] → Mitigation": ${l.trim().slice(0, 60)}`);
+    }
+  }
+}
+
 function sectionBodies(ls) {
   const out = {};
   let cur = null;
@@ -523,6 +549,7 @@ if (!fs.existsSync(changeDir) || !fs.statSync(changeDir).isDirectory()) {
 }
 
 const specCoversNames = [];
+let planText = "";
 
 // specs
 const specsRoot = path.join(changeDir, "specs");
@@ -540,6 +567,7 @@ if (fs.existsSync(specsRoot)) {
 for (const sf of specFiles) {
   const text = readIf(sf.path);
   if (text == null) continue;
+  planText += "\n" + text;
   if (!KEBAB.test(sf.cap)) {
     err(rel(sf.path), 0, `capability directory "${sf.cap}" is not kebab-case`);
   }
@@ -580,6 +608,7 @@ if (designText == null) {
   err("design.md", 0, "design.md not found - it is mandatory for every change");
 } else {
   lintDesign("design.md", designText, specCoversNames);
+  lintSecurityGate("design.md", designText, planText + "\n" + (proposalText || ""));
 }
 
 // tasks

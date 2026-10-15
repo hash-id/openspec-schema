@@ -53,42 +53,6 @@
         "agents/openai.yaml": "9b4c470d63221c1f68f22df70b83e2f12401b317babe0d1b7b5f24a974474d0d"
       }
     },
-    "stride-analysis-patterns": {
-      "source": "wshobson/agents",
-      "sourceType": "github",
-      "sourceRef": "main",
-      "sourceCommit": "38e19c20d2b154510b0e624a2e3e186b19b5c527",
-      "sourcePath": "plugins/security-scanning/skills/stride-analysis-patterns",
-      "license": "MIT",
-      "files": {
-        "SKILL.md": "b7cfab85be4d04a81d22f79cc3b0e95aab8aa3ae4dfacbcf44de076dbeb16f1e",
-        "references/details.md": "c386eb04dacbbb52eaaed318e7681549c40bd4686cce2f0d17d24f1c03ae1049"
-      }
-    },
-    "threat-mitigation-mapping": {
-      "source": "wshobson/agents",
-      "sourceType": "github",
-      "sourceRef": "main",
-      "sourceCommit": "38e19c20d2b154510b0e624a2e3e186b19b5c527",
-      "sourcePath": "plugins/security-scanning/skills/threat-mitigation-mapping",
-      "license": "MIT",
-      "files": {
-        "SKILL.md": "40cf933689b7783480fbf567c9b7573a9626977912acf7fcb808287934c7dfa8",
-        "references/details.md": "767e373e9a7b321095352f856499965a4abe999f247cde2415edcf2e038a045b"
-      }
-    },
-    "security-requirement-extraction": {
-      "source": "wshobson/agents",
-      "sourceType": "github",
-      "sourceRef": "main",
-      "sourceCommit": "38e19c20d2b154510b0e624a2e3e186b19b5c527",
-      "sourcePath": "plugins/security-scanning/skills/security-requirement-extraction",
-      "license": "MIT",
-      "files": {
-        "SKILL.md": "bf391927dc404280e0f4d8c0ec20513c579fc6c277dfd04ad5a8e0a730ce8dde",
-        "references/details.md": "e304b0e15e876dfc99e09302491fa1c635e0a509e5a04b91ed1047b6400f12da"
-      }
-    },
     "humanizer": {
       "source": "blader/humanizer",
       "sourceType": "github",

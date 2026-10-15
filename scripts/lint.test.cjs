@@ -417,3 +417,90 @@ test("template placeholder capability is ignored", () => {
   );
   assert.strictEqual(r.code, 0, r.out);
 });
+
+// ---------------------------------------------------------------------------
+// security gate (WARN only)
+// ---------------------------------------------------------------------------
+
+const AUTH_SPEC = GOOD_SPEC.replace("allow users to export their data", "require authentication before users export their data");
+
+test("trust-boundary keyword with no threat entry and no skip line is a WARN", () => {
+  const r = run(goodChange({ "specs/data-export/spec.md": AUTH_SPEC }));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /WARN design\.md\s+possible trust boundary \(matched: authentication\)/);
+});
+
+test("a well-formed [Threat: ...] entry silences the security gate", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": AUTH_SPEC,
+      "design.md": GOOD_DESIGN.replace(
+        "[Large dataset] → stream in chunks",
+        "[Large dataset] → stream in chunks\n[Threat: Elevation of privilege, High] → check owner on every export (Authorization Cheat Sheet)"
+      ),
+    })
+  );
+  assert.strictEqual(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /trust boundary|threat line/);
+});
+
+test('a "Security pass: skipped - <reason>" line silences the security gate', () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": AUTH_SPEC,
+      "design.md": GOOD_DESIGN.replace(
+        "[Large dataset] → stream in chunks",
+        "[Large dataset] → stream in chunks\nSecurity pass: skipped - export reuses the existing authenticated route"
+      ),
+    })
+  );
+  assert.doesNotMatch(r.out, /trust boundary/);
+});
+
+test("a threat line without category and severity is a WARN", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": AUTH_SPEC,
+      "design.md": GOOD_DESIGN.replace("[Large dataset] → stream in chunks", "[Threat] → check owner on every export"),
+    })
+  );
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /threat line should read "\[Threat: <category>, <High\|Medium\|Low>\]/);
+});
+
+test("no trust-boundary keyword means no security-gate finding", () => {
+  const r = run(goodChange());
+  assert.doesNotMatch(r.out, /trust boundary/);
+});
+
+test("a skip line together with threat entries is a WARN", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": AUTH_SPEC,
+      "design.md": GOOD_DESIGN.replace(
+        "[Large dataset] → stream in chunks",
+        "[Threat: Elevation of privilege, High] → check owner on every export\nSecurity pass: skipped - export reuses the existing authenticated route"
+      ),
+    })
+  );
+  assert.match(r.out, /both a "Security pass: skipped" line and "\[Threat" entries/);
+});
+
+test("a skip line with a one-word reason does not silence the gate", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": AUTH_SPEC,
+      "design.md": GOOD_DESIGN.replace("[Large dataset] → stream in chunks", "[Large dataset] → stream in chunks\nSecurity pass: skipped - n/a"),
+    })
+  );
+  assert.match(r.out, /possible trust boundary/);
+});
+
+test("everyday words like design token and session timeout do not trip the gate", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": GOOD_SPEC.replace("in CSV format", "in CSV format using the design token for button color after a session timeout"),
+    })
+  );
+  assert.doesNotMatch(r.out, /trust boundary/);
+});

@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased (schema v13, unchanged)
+## Unreleased (schema v14)
+
+Security approach reworked after comparing it with OWASP, NIST, published practice at Anthropic, OpenAI, Cloudflare and Vercel, and academic work. Evidence and sources: `docs/research/2026-10-15-security-approach-vendored-skills-vs-standards.md`.
+
+- **New `hrt-security-pass` skill replaces three vendored `wshobson/agents` skills** (`stride-analysis-patterns`, `threat-mitigation-mapping`, `security-requirement-extraction`; removed from `skills/vendor/` and `vendor-lock.json`). A tiny `SKILL.md` that holds only the gate (a change touching no trust boundary pays almost nothing), `references/method.md` (STRIDE questions, a surface table, the threat line, the `apply` step) loaded only when the gate fires, and one small file per list, read only for the surfaces a change touches: OWASP Top 10:2025 (web), API Security Top 10:2023, Mobile Top 10 (2024), LLM Top 10 2025, Agentic Top 10 2026, Non-Human Identities Top 10 2025, MITRE CWE Top 25 2025, and Odoo 18+ hints (each point sourced to Odoo's 18.0 and 19.0 docs or source docstrings). The gate also covers secrets, sensitive data in logs, new dependencies, and LLM or agent tool use. Threats use a fixed line `[Threat: <category>, <High|Medium|Low>] → Mitigation (<Cheat Sheet or CWE>)`, or `Security pass: skipped - <reason>`. Threats now carry a severity, and mitigations name an OWASP Cheat Sheet or CWE
+- `schema.yaml` (v13 → v14): `specs` and `design` use the same modal word (MUST) for the same gate and both point at `hrt-security-pass`; `design.md` template documents the threat and skip lines
+- **`apply` Phase 2 gets a security gate.** `hrt-apply-code-review` runs the repo's own security commands (scripts, pre-commit, CI, scanner configs) scoped to the diff: a finding on a changed line is HIGH, an older one is reported once as LOW and never blocks, no scanner is installed or downloaded, and scanner output is treated as data. A security lens is added to the contract map: it uses the same `hrt-security-pass` reference lists matched to the changed files, with an explicit do-not-report list, and checks that each `[security]` test's RED output exercises the threat. `hrt-mr-brief` Evidence names the scanners run or `no scanner configured`. To limit human and token cost, LOW security findings are reported once as a batch instead of asked one by one, and passes 2 and 3 re-run the lens only if the previous pass raised a security finding (the scanner still re-runs every pass)
+- `hrt-artifact-lint`: new WARN-only security gate (proposal/specs name a trust-boundary keyword but `design.md` has neither a threat line nor the skip line; threat line missing category or severity). Eight new cases (38 in `lint.test.cjs`); the keyword list avoids everyday words (token, session, permission, third-party) and the gate also warns when a skip line sits beside threat entries or gives a one-word reason. `hrt-align-consistency-review` judges whether a flagged boundary is real
+- README gains a short Security note (gitleaks and osv-scanner as suggested baselines, nothing bundled). Installers (`.sh` and `.ps1`) list `hrt-security-pass` and drop the three removed skills
+- Evaluated and not adopted: OWASP ASVS (web-centred, no L1 requirements in V16, CC BY-SA 4.0, needs a lookup script and attribution), a bundled scanner, a persistent repo-level threat model, NIST/CISA mapping
+- Not yet exercised on a real change, and no study found that plan-time security text improves downstream code security; there is no benchmark harness here, so this has no measured evidence
+
+### Earlier in Unreleased (schema v13 at the time)
+
 
 Ideas taken from cursor/plugins `pstack` after a line-by-line comparison against this schema. Skills and installer text only; `schema.yaml` is untouched, so no version bump.
 

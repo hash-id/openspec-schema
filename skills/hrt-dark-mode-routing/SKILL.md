@@ -15,9 +15,9 @@ A finding that would normally escalate to the user is routed as below. Everythin
 
 | Phase | Routes to `hrt-dark-mode-decision-gate` | Still goes to the user | `dark.md` section |
 | --- | --- | --- | --- |
-| `proposal` (`hrt-adversarial-authoring`, artifact: proposal) | a single-reviewer UNANCHORED finding | everything the security skills decided; the `hrt-change-size-gate` "one change or several?" question | Proposal |
-| `specs` (`hrt-adversarial-authoring`, artifact: specs) | a single-reviewer UNANCHORED finding | everything the security skills decided | Specs |
-| `design` (`hrt-adversarial-authoring`, artifact: design) | a single-reviewer UNANCHORED finding | everything the security skills decided | Design |
+| `proposal` (`hrt-adversarial-authoring`, artifact: proposal) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided; the `hrt-change-size-gate` "one change or several?" question | Proposal |
+| `specs` (`hrt-adversarial-authoring`, artifact: specs) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided | Specs |
+| `design` (`hrt-adversarial-authoring`, artifact: design) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided | Design |
 | `align` (`hrt-align-consistency-review`) | every ALIGN DECISION and HIGH finding | nothing extra — but VERIFY and WALKTHROUGH are unchanged, and WALKTHROUGH stays the mandatory closing review; the user is also shown `dark.md` | Align (tag each entry with its cycle number) |
 | `apply` Phase 1 (`tdd` loop) | a seam-mismatch blocker (the gate can weigh an alternative seam against code, design, and specs) | any other Phase 1 blocker | Apply |
 | `apply` Phase 2 (`hrt-apply-code-review`) | every finding that would otherwise surface to the user | nothing extra | Apply |
@@ -25,7 +25,7 @@ A finding that would normally escalate to the user is routed as below. Everythin
 ## Invariants across all phases
 
 1. ANCHORED findings, and findings both independent reviewers raised, auto-resolve in the calling skill and never reach this routing at all.
-2. A finding that is a security requirement or mitigation already decided by `stride-analysis-patterns` / `threat-mitigation-mapping` / `security-requirement-extraction` ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`. That decision is a hard constraint, not an opposing case to weigh.
+2. A finding that is a security requirement or mitigation already decided by `hrt-security-pass` ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`. That decision is a hard constraint, not an opposing case to weigh.
 3. The `hrt-change-size-gate` "one change or several?" question ALWAYS goes to the user. The answer depends on the user's capacity and priorities, which no grounding artifact holds.
 4. WALKTHROUGH in `align` stays mandatory and fully manual in every dark-mode variant.
 5. `hrt-dark-mode-decision-gate` is always a fresh subagent, always writes its reasoning to the matching `dark.md` section, and never escalates to the user from within itself — it always produces a decision. See that skill for the steel-manning procedure.

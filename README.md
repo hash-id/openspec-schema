@@ -73,6 +73,8 @@ openspec instructions align   --change <name>
 openspec instructions apply   --change <name>
 ```
 
+**Security.** `specs` and `design` run a short plan-time security pass (`hrt-security-pass`) only when a change touches a trust boundary, using the OWASP Top 10 list that matches what the change touches (web, API, mobile, LLM, agent, machine identities) plus the MITRE CWE Top 25. `apply` reuses the same lists on the changed code. `apply` runs whatever security commands your repo already has (scripts, pre-commit, CI, scanner configs), scoped to the diff. `tempa-spec` installs no scanner. If you have none, two language-agnostic, permissively licensed starting points are [gitleaks](https://github.com/gitleaks/gitleaks) (secrets) and [osv-scanner](https://github.com/google/osv-scanner) (vulnerable dependencies); add a SAST tool for your language on top.
+
 ## Layout
 
 ```
