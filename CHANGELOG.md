@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (schema v14)
+## 2026.10.15 — 2026-10-15 (schema v14)
 
 Security approach reworked after comparing it with OWASP, NIST, published practice at Anthropic, OpenAI, Cloudflare and Vercel, and academic work. Evidence and sources: `docs/research/2026-10-15-security-approach-vendored-skills-vs-standards.md`.
 
@@ -12,7 +12,7 @@ Security approach reworked after comparing it with OWASP, NIST, published practi
 - Evaluated and not adopted: OWASP ASVS (web-centred, no L1 requirements in V16, CC BY-SA 4.0, needs a lookup script and attribution), a bundled scanner, a persistent repo-level threat model, NIST/CISA mapping
 - Not yet exercised on a real change, and no study found that plan-time security text improves downstream code security; there is no benchmark harness here, so this has no measured evidence
 
-### Earlier in Unreleased (schema v13 at the time)
+### Also in this release: ideas from pstack (skills and installer text; no schema change, made while the schema was still v13)
 
 
 Ideas taken from cursor/plugins `pstack` after a line-by-line comparison against this schema. Skills and installer text only; `schema.yaml` is untouched, so no version bump.
@@ -20,7 +20,7 @@ Ideas taken from cursor/plugins `pstack` after a line-by-line comparison against
 - `hrt-apply-code-review`: the weak-oracle gate now lists the shapes of a weak test (existence or truthiness only, call-only, expected value computed by the code under test or a restated constant, assertions on data the test built) and how to fix one (one concrete input, assert the literal result; assert a mock's payload; pair an absence with a presence). Relation checks and type-level tests are kept. Same trigger and same mandatory conditions as before; findings are now called "weak oracle" instead of "tautological oracle"
 - `hrt-adversarial-authoring` (`design`): seams are reviewed against `to-spec`'s rule, which the schema had not carried over: test at the highest available entry point, fewer seams is better (ideal one). The Auditor flags seams that test an internal collaborator and seams a higher one would cover; the Critic asks whether a higher existing boundary already covers a seam, and names one structurally different shape for a Decision that creates a new module or seam
 - `hrt-mr-brief`: Blast Radius says what it rests on (suite result, a design Risk, or the diff alone) and writes "not checked beyond the diff" when it is the diff alone
-- Installers (`.sh` and `.ps1`) list `hrt-mr-brief` in their skill echo; AGENTS.md skill count corrected to 19
+- Installers (`.sh` and `.ps1`) list `hrt-mr-brief` in their skill echo; AGENTS.md skill count corrected to 19 (17 after the security change above)
 - The pinned commit of the `mattpocock/skills` entries in `vendor-lock.json` moved to `49dd158d1`; their file contents did not change
 - Not adopted from pstack: multi-model arena/interrogate/swarm, the task-type router, the confidence ladder, a reverse diff-to-task check (`apply`'s "No scope drift" line already covers it), and attack-the-premise (`diagnosing-bugs` ranked hypotheses and the 3-pass review cap cover it)
 - Not yet exercised on a real change; there is no benchmark harness, so none of these has measured evidence
