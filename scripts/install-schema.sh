@@ -73,7 +73,7 @@ shopt -u nullglob
 
 echo "Installing skills..."
 # One call: this repo's skills/ holds both the hrt-* skills (skills/<name>/) and
-# skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, research, the three
+# skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, research, codebase-design, the three
 # wshobson security skills, and humanizer — vendored from their upstreams,
 # refreshed via scripts/vendor-skills.cjs). --full-depth makes the walk recurse
 # into skills/vendor/ instead of stopping one level down.
@@ -97,6 +97,6 @@ node "$TMP/merge-config.cjs" "$CONFIG" "$SCHEMA_NAME" "$CONTEXT_MARKER" "$CONTEX
 }
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, humanizer, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
+echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, codebase-design, stride-analysis-patterns, threat-mitigation-mapping, security-requirement-extraction, humanizer, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

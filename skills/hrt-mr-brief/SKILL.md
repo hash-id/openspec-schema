@@ -78,7 +78,7 @@ Show a before and after for the behaviour that matters most, not for every task.
 
 **Door.** A two-way door can be walked back with a revert. A one-way door cannot. Mark one-way when the diff contains any of: a data migration or destructive schema change, deletion of stored data, a change to a published API or event contract, a config or flag removal that other code reads, or a step that has to be undone by hand. Otherwise two-way. Check the specs' `MODIFIED` and `REMOVED` deltas, since a breaking spec change is a contract change.
 
-**Blast Radius.** One word (for example `module`, `consumers`, `data`, `tenant`, `release`), then one or two sentences on who or what breaks if the change is wrong. Draw this from `design.md` Risks / Trade-offs and the diff. If `design.md` lists a `[Threat] -> Mitigation` entry, say whether a passing test covers the mitigation. Do not contradict a failure-consequence statement already approved in the design.
+**Blast Radius.** One word (for example `module`, `consumers`, `data`, `tenant`, `release`), then one or two sentences on who or what breaks if the change is wrong. Draw this from `design.md` Risks / Trade-offs and the diff. If `design.md` lists a `[Threat] -> Mitigation` entry, say whether a passing test covers the mitigation. Do not contradict a failure-consequence statement already approved in the design. Say what the Blast Radius rests on (the suite result, a design Risk, or the diff alone). If it rests on the diff alone, write "not checked beyond the diff".
 
 ## Rules
 

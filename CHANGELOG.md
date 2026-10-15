@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased (schema v13, unchanged)
+
+Ideas taken from cursor/plugins `pstack` after a line-by-line comparison against this schema. Skills and installer text only; `schema.yaml` is untouched, so no version bump.
+
+- `hrt-apply-code-review`: the weak-oracle gate now lists the shapes of a weak test (existence or truthiness only, call-only, expected value computed by the code under test or a restated constant, assertions on data the test built) and how to fix one (one concrete input, assert the literal result; assert a mock's payload; pair an absence with a presence). Relation checks and type-level tests are kept. Same trigger and same mandatory conditions as before; findings are now called "weak oracle" instead of "tautological oracle"
+- Vendors `codebase-design` from `mattpocock/skills` (the vendored `tdd` already pointed at it, so the reference was dangling). `hrt-adversarial-authoring`'s `design` Structural Auditor judges seams with its vocabulary and deletion test, and its Destructive Critic names one structurally different shape for a Decision that creates a new module or seam. Refreshing the lock also moved the pinned commit of the other `mattpocock/skills` entries to `49dd158d1`; their file contents did not change
+- `hrt-mr-brief`: Blast Radius says what it rests on (suite result, a design Risk, or the diff alone) and writes "not checked beyond the diff" when it is the diff alone
+- Installers (`.sh` and `.ps1`) list `codebase-design` in their skill echo
+- Not adopted from pstack: multi-model arena/interrogate/swarm, the task-type router, the confidence ladder, a reverse diff-to-task check (`apply`'s "No scope drift" line already covers it), and attack-the-premise (`diagnosing-bugs` ranked hypotheses and the 3-pass review cap cover it)
+- Not yet exercised on a real change; there is no benchmark harness, so none of these has measured evidence
+
 ## 2026.10.8 — 2026-10-08 (schema v13)
 
 - **Parallel `apply`, declared in `tasks.md`.** A task group may carry one `Depends on: none | 1, 2` line under its heading. `apply` PHASE 1 then schedules a rolling frontier (as in mattpocock's `implement-spec`): one subagent per group, a finished group immediately frees newly unblocked ones. A group without the line depends on the group before it, so existing `tasks.md` files behave as before. Parallel is never the default: `apply` shows the group graph as ASCII, states the concurrency limit `min(floor(cores / 3), floor(available GB / 2))`, and asks whether to run concurrently or in order (no question in dark mode, which runs in order; limit below 2 or unreadable also runs in order). One shared working tree, no worktrees; only the orchestrator ticks checkboxes; the full suite runs only at quiet points. There is deliberately no `Touches:` / `Test:` line to keep `tasks.md` short: the declared dependencies are the isolation, `align` checks they are true, and `apply` stops and reports a missing edge if two concurrent groups change the same file or a test fails in code the group did not change
