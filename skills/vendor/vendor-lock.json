@@ -6,7 +6,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
       "sourcePath": "skills/productivity/grilling",
       "license": "MIT",
       "files": {
@@ -18,7 +18,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
       "sourcePath": "skills/engineering/tdd",
       "license": "MIT",
       "files": {
@@ -32,7 +32,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
       "sourcePath": "skills/engineering/diagnosing-bugs",
       "license": "MIT",
       "files": {
@@ -45,7 +45,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "f3fc5632f401156837ee3872f14fe33ccf1024ea",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
       "sourcePath": "skills/engineering/research",
       "license": "MIT",
       "files": {
@@ -102,6 +102,20 @@
       "only": [
         "SKILL.md"
       ]
+    },
+    "codebase-design": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceRef": "main",
+      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "sourcePath": "skills/engineering/codebase-design",
+      "license": "MIT",
+      "files": {
+        "DEEPENING.md": "f3dd099ce99289bd213914d8ee3e2429b78309c3957ca4583f7659551b1d53c1",
+        "DESIGN-IT-TWICE.md": "52b52e75655a27aea59c6966b410bac82448968ad46ef1ebb9f07c274e3ae010",
+        "SKILL.md": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2",
+        "agents/openai.yaml": "edebc9e4fcfe102114012575eaa9600b9b5fd08c311664f389c36e7bc717740f"
+      }
     }
   }
 }
