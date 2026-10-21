@@ -13,7 +13,7 @@ Resolve one escalation-worthy finding without asking the user, and log the reaso
 - MUST NOT run on a finding that is a security requirement or mitigation already decided by `hrt-security-pass` — that decision is a hard constraint, not an opposing case to weigh. Escalate those to the user even in dark mode.
 
 ## Fresh subagent, always
-Caller MUST spawn a fresh subagent with no memory of the session that produced the finding. Give it only: the finding, and the grounding artifacts needed to evaluate it (discovery.md, proposal.md, specs/**/*.md, design.md, tasks.md, align.md as relevant; code and test output if called from `apply`). MUST NOT run inline in the calling session's own context — a same-context steel-man reuses the reasoning that produced the original recommendation instead of opposing it.
+Caller MUST spawn a fresh subagent with no memory of the session that produced the finding. Give it only: the finding, and the grounding artifacts needed to evaluate it (proposal.md, specs/**/*.md, design.md, tasks.md, align.md as relevant; code and test output if called from `apply`). MUST NOT run inline in the calling session's own context — a same-context steel-man reuses the reasoning that produced the original recommendation instead of opposing it.
 
 ## Procedure
 1. If called from `hrt-apply-code-review`: verify actual behavior first (run the test, read the code path) before building step 4's argument.
@@ -26,7 +26,7 @@ Caller MUST spawn a fresh subagent with no memory of the session that produced t
    - **LOW** — opposing case was weak.
    - **MEDIUM** — opposing case had real weight, some doubt remains.
    - **HIGH** — opposing case not fully resolved; needs human eyes before anything downstream depends on it.
-8. Write to `dark.md`'s matching section (Proposal / Specs / Design / Align / Apply): claim, opposing case, decision, residual-risk tag, why.
+8. Write to `dark.md`'s matching section (Specs / Design / Align / Apply): claim, opposing case, decision, residual-risk tag, why.
 9. MUST NOT escalate to the user from within this skill — it always produces a decision.
 
 Within each `dark.md` section: HIGH first, then MEDIUM, then LOW.

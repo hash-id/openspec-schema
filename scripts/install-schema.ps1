@@ -97,9 +97,8 @@ try {
 
     Write-Host "Installing skills..."
     # One call: this repo's skills/ holds both the hrt-* skills (skills/<name>/) and
-    # skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, research, the three
-    # wshobson security skills, and humanizer - vendored from their upstreams,
-    # refreshed via scripts/vendor-skills.cjs). --full-depth makes the walk recurse
+    # skills/vendor/<name>/ (grilling, tdd, diagnosing-bugs, and research -
+    # vendored from their upstream, refreshed via scripts/vendor-skills.cjs). --full-depth makes the walk recurse
     # into skills/vendor/ instead of stopping one level down.
     $ErrorActionPreference = "Continue"
     "" | npx --yes skills@latest add "$Repo/skills" --full-depth --agent '*' -y 2>&1 | Write-Host
@@ -136,7 +135,7 @@ try {
     }
 
     Write-Host "Installed '$SchemaName' -> $Dest"
-    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, humanizer, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, hrt-security-pass, plain-language-writing, hrt-change-size-gate, hrt-backlog-reconcile, hrt-mr-brief, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
+    Write-Host "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, hrt-security-pass, plain-language-writing, hrt-mr-brief, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
     Write-Host "Set default schema -> $SchemaName ($Config)"
     Write-Host "Use it:  openspec new change <name>"
 }

@@ -9,7 +9,7 @@
 
 ### ALIGN
 
-<!-- One line per finding: `[MECHANICAL|DECISION] <finding> -> <fix applied | user decision | deferred>`. Every recorded DECISION and resolved HIGH names its source (e.g. "discovery.md > Key Decisions") so apply can jump to the exact passage. Omit a severity heading if it had no findings. -->
+<!-- One line per finding: `[MECHANICAL|DECISION] <finding> -> <fix applied | user decision | deferred>`. Every recorded DECISION and resolved HIGH names its source (e.g. "proposal.md > What Changes") so apply can jump to the exact passage. Omit a severity heading if it had no findings. -->
 
 #### HIGH
 -
@@ -27,15 +27,20 @@
 
 ### VERIFY
 
-<!-- Fresh-context re-check of this cycle's ALIGN map and fixes. One line: `<clean | finding>`. If VERIFY found something new, add it to the HIGH/MEDIUM/LOW lists above (tagged like any other finding) rather than a separate list here. -->
+<!-- Fresh-context re-check of this cycle's ALIGN map and fixes. Runs only when this cycle's ALIGN raised a HIGH finding; otherwise write `skipped - no HIGH`. One line: `<clean | finding | skipped - no HIGH>`. If VERIFY found something new, add it to the HIGH/MEDIUM/LOW lists above (tagged like any other finding) rather than a separate list here. -->
 -
 
 ### WALKTHROUGH
 
-<!-- One entry for the round. Format: `Files: <proposal.md, each specs/**/*.md, design.md, tasks.md as listed> -> <user's answer, verbatim or summarized>`. "Nothing" is a valid answer. -->
+<!-- One entry for the round. Format: `Digest: <specs (one line per capability), design (decisions, threats, seams), coverage table, tasks.md, proposal.md, size facts> -> <user's answer, verbatim or summarized>`. "Nothing" is a valid answer. -->
 -
 
 <!-- Add a `## Cycle N` block (ALIGN + VERIFY + WALKTHROUGH) for each cycle actually run. No cap - keep adding blocks as long as walkthrough feedback re-enters ALIGN. -->
+
+## Gate Records
+
+<!-- Only when the user said a check was wrong or noisy (a lint rule, an align dimension, a review pass, the change-size question). One line each: `<gate> | input: <what it was given> | output: <what it said> | user: <accepted | overruled | edited>`. Empty if none. -->
+-
 
 ## Known Issues
 

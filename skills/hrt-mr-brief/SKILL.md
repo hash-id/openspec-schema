@@ -9,7 +9,7 @@ Adapted from the `pr` skill in `mattpocock/skills` (MIT), which credits Dex Hort
 
 ## Why this exists
 
-A reviewer of a merge request sees the diff. The reasoning behind it lives in `discovery.md`, `design.md`, `align.md`, and `specs/**/*.md`, which the reviewer may never open. `mr-brief.md` is the one file that tells the reviewer what changed, proves it works, and says what it costs to be wrong.
+A reviewer of a merge request sees the diff. The reasoning behind it lives in `proposal.md`, `design.md`, `align.md`, and `specs/**/*.md`, which the reviewer may never open. `mr-brief.md` is the one file that tells the reviewer what changed, proves it works, and says what it costs to be wrong.
 
 This skill only writes the file. The user commits it with the code and posts its content wherever their review happens. The skill never posts anything and never runs git.
 

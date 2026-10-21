@@ -15,4 +15,4 @@ Run the gate per capability in `specs`, per change in `design`, and on the diff 
 
 **If none hold:** in `design`, write `Security pass: skipped - <reason>` under Risks / Trade-offs; in `specs` and in `apply`'s review, write nothing. Stop. Do not read anything else.
 
-**If any hold:** read `references/method.md` and follow the sections for your phase. It picks the reference lists to read (OWASP Top 10 lists, MITRE CWE Top 25, framework hints) from what the change touches, and sets the `[Threat: <category>, <High|Medium|Low>] → Mitigation (<source>)` line for `design.md`.
+**If any hold:** read `references/method.md` and follow the sections for your phase. It picks the reference lists to read (OWASP Top 10 lists, MITRE CWE Top 25, framework hints) from what the change touches, and sets the `[Threat T<n>: <category>, <High|Medium|Low>] → Mitigation (<source>)` line for `design.md`.

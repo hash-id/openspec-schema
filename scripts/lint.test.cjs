@@ -11,9 +11,10 @@ const path = require("node:path");
 // this test stays in scripts/ so it does NOT ship. Keep the two in sync.
 const SCRIPT = path.join(__dirname, "..", "skills", "hrt-artifact-lint", "lint.cjs");
 
-function run(changeDir, specsDir) {
+function run(changeDir, specsDir, ...flags) {
   const args = [SCRIPT, changeDir];
   if (specsDir) args.push(specsDir);
+  args.push(...flags);
   try {
     const out = execFileSync("node", args, { encoding: "utf8" });
     return { code: 0, out };
@@ -89,10 +90,14 @@ None.
 
 const GOOD_TASKS = `## 1. Export CSV for a single table
 
+Covers: Successful export
+
 - [ ] 1.1 Create export module
 - [ ] 1.2 Wire export command
 
 ## 2. Export with filters
+
+Covers: none
 
 - [ ] 2.1 Parse filters
 - [ ] 2.2 Apply before formatting
@@ -161,6 +166,7 @@ test("requirement without SHALL/MUST is a WARN, not an error", () => {
     goodChange({
       "specs/data-export/spec.md":
         "## ADDED Requirements\n\n### Requirement: Soft\nThe system should maybe do X.\n\n#### Scenario: s\n- **WHEN** a\n- **THEN** b\n",
+      "tasks.md": GOOD_TASKS.replace("Covers: Successful export", "Covers: s"),
     })
   );
   assert.strictEqual(r.code, 0, r.out);
@@ -276,7 +282,7 @@ test("archive task in tasks.md is an ERROR", () => {
 test("non-checkbox bullet under a task heading is a WARN", () => {
   const r = run(
     goodChange({
-      "tasks.md": GOOD_TASKS + "\n## 3. More\n\n- do a thing without a checkbox\n",
+      "tasks.md": GOOD_TASKS + "\n## 3. More\n\nCovers: none\n\n- do a thing without a checkbox\n",
     })
   );
   assert.strictEqual(r.code, 0, r.out);
@@ -288,18 +294,21 @@ test("non-checkbox bullet under a task heading is a WARN", () => {
 const PAR_TASKS = `## 1. Core
 
 Depends on: none
+Covers: Successful export
 
 - [ ] 1.1 Build core
 
 ## 2. Reports
 
 Depends on: none
+Covers: none
 
 - [ ] 2.1 Build reports
 
 ## 3. Wire up
 
 Depends on: 1, 2
+Covers: none
 
 - [ ] 3.1 Wire both
 `;
@@ -328,7 +337,7 @@ test("group depending on itself is an ERROR", () => {
 
 test("dependency cycle is an ERROR", () => {
   const r = run(
-    tasksChange(PAR_TASKS.replace("## 1. Core\n\nDepends on: none", "## 1. Core\n\nDepends on: 3"))
+    tasksChange(PAR_TASKS.replace("## 1. Core\n\nDepends on: none\nCovers: Successful export", "## 1. Core\n\nDepends on: 3\nCovers: Successful export"))
   );
   assert.strictEqual(r.code, 1);
   assert.match(r.out, /dependency cycle/);
@@ -436,8 +445,9 @@ test("a well-formed [Threat: ...] entry silences the security gate", () => {
       "specs/data-export/spec.md": AUTH_SPEC,
       "design.md": GOOD_DESIGN.replace(
         "[Large dataset] → stream in chunks",
-        "[Large dataset] → stream in chunks\n[Threat: Elevation of privilege, High] → check owner on every export (Authorization Cheat Sheet)"
+        "[Large dataset] → stream in chunks\n[Threat T1: Elevation of privilege, High] → check owner on every export (Authorization Cheat Sheet)"
       ),
+      "tasks.md": SEC_TASKS,
     })
   );
   assert.strictEqual(r.code, 0, r.out);
@@ -461,11 +471,12 @@ test("a threat line without category and severity is a WARN", () => {
   const r = run(
     goodChange({
       "specs/data-export/spec.md": AUTH_SPEC,
-      "design.md": GOOD_DESIGN.replace("[Large dataset] → stream in chunks", "[Threat] → check owner on every export"),
+      "design.md": GOOD_DESIGN.replace("[Large dataset] → stream in chunks", "[Threat T1: Elevation of privilege] → check owner on every export"),
+      "tasks.md": SEC_TASKS,
     })
   );
   assert.strictEqual(r.code, 0, r.out);
-  assert.match(r.out, /threat line should read "\[Threat: <category>, <High\|Medium\|Low>\]/);
+  assert.match(r.out, /threat line should read "\[Threat T<n>: <category>, <High\|Medium\|Low>\]/);
 });
 
 test("no trust-boundary keyword means no security-gate finding", () => {
@@ -479,7 +490,7 @@ test("a skip line together with threat entries is a WARN", () => {
       "specs/data-export/spec.md": AUTH_SPEC,
       "design.md": GOOD_DESIGN.replace(
         "[Large dataset] → stream in chunks",
-        "[Threat: Elevation of privilege, High] → check owner on every export\nSecurity pass: skipped - export reuses the existing authenticated route"
+        "[Threat T1: Elevation of privilege, High] → check owner on every export\nSecurity pass: skipped - export reuses the existing authenticated route"
       ),
     })
   );
@@ -503,4 +514,218 @@ test("everyday words like design token and session timeout do not trip the gate"
     })
   );
   assert.doesNotMatch(r.out, /trust boundary/);
+});
+
+// ---------------------------------------------------------------------------
+// task coverage: Covers: per group
+// ---------------------------------------------------------------------------
+
+const TWO_SCENARIO_SPEC = GOOD_SPEC + `
+#### Scenario: Export of an empty table
+- **WHEN** the table has no rows
+- **THEN** a CSV with only the header row downloads
+`;
+
+test("a scenario no group covers is an ERROR", () => {
+  const r = run(goodChange({ "specs/data-export/spec.md": TWO_SCENARIO_SPEC }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /scenario "Export of an empty table" is covered by no task group/);
+});
+
+test("a scenario covered through a semicolon-separated Covers line passes", () => {
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": TWO_SCENARIO_SPEC,
+      "tasks.md": GOOD_TASKS.replace("Covers: Successful export", "Covers: Successful export; Export of an empty table"),
+    })
+  );
+  assert.strictEqual(r.code, 0, r.out);
+});
+
+test("a Covers name that matches no scenario is an ERROR", () => {
+  const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: none", "Covers: Imaginary scenario") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 "Covers: Imaginary scenario" names no scenario/);
+});
+
+test("a group with no Covers line is an ERROR", () => {
+  const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: none\n\n", "") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 has no "Covers:" line/);
+});
+
+test("an empty Covers line is an ERROR", () => {
+  const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: none", "Covers:") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 has an empty "Covers:" line/);
+});
+
+test("Covers: none is accepted for a structure-only group", () => {
+  const r = run(goodChange());
+  assert.strictEqual(r.code, 0, r.out);
+  assert.doesNotMatch(r.out, /Covers/);
+});
+
+test("Covers matching ignores case and surrounding space", () => {
+  const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: Successful export", "Covers:   successful EXPORT ") }));
+  assert.strictEqual(r.code, 0, r.out);
+});
+
+test("a Covers line inside an HTML comment does not count", () => {
+  const r = run(
+    goodChange({
+      "tasks.md": GOOD_TASKS.replace("Covers: Successful export", "<!-- Covers: Successful export -->"),
+    })
+  );
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 1 has no "Covers:" line/);
+});
+
+test("a Covers-looking line after the first checkbox is prose", () => {
+  const r = run(
+    goodChange({
+      "tasks.md": GOOD_TASKS.replace("Covers: none\n\n", "").replace("- [ ] 2.2 Apply before formatting", "- [ ] 2.2 Apply before formatting\nCovers: none"),
+    })
+  );
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 has no "Covers:" line/);
+});
+
+// ---------------------------------------------------------------------------
+// threat ids: matched by id from tasks.md Covers:
+// ---------------------------------------------------------------------------
+
+const T1 = "[Threat T1: Elevation of privilege, High] → check owner on every export (Authorization Cheat Sheet)";
+const SEC_TASKS = GOOD_TASKS.replace("Covers: Successful export", "Covers: Successful export; T1").replace(
+  "- [ ] 1.2 Wire export command",
+  "- [ ] 1.2 Refuse export of another user's data [security]"
+);
+
+function threatChange(threatLine, extra = {}) {
+  return goodChange({
+    "specs/data-export/spec.md": AUTH_SPEC,
+    "tasks.md": SEC_TASKS,
+    "design.md": GOOD_DESIGN.replace("[Large dataset] → stream in chunks", "[Large dataset] → stream in chunks\n" + threatLine),
+    ...extra,
+  });
+}
+
+test("a threat covered by a group with a [security] task passes", () => {
+  const r = run(threatChange(T1));
+  assert.strictEqual(r.code, 0, r.out);
+});
+
+test("a threat with no id is an ERROR", () => {
+  const r = run(threatChange("[Threat: Elevation of privilege, High] → check owner on every export"));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /threat has no id/);
+});
+
+test("a duplicate threat id is an ERROR", () => {
+  const r = run(threatChange(T1 + "\n" + T1));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /threat id T1 is used twice/);
+});
+
+test("a threat no group covers is an ERROR", () => {
+  const r = run(threatChange(T1, { "tasks.md": GOOD_TASKS }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /threat T1 is covered by no task group/);
+});
+
+test("a Covers: threat id that design.md does not define is an ERROR", () => {
+  const r = run(threatChange(T1, { "tasks.md": SEC_TASKS.replace("; T1", "; T1; T7") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 1 "Covers: T7" names no threat/);
+});
+
+test("a group covering a threat without a [security] task is an ERROR", () => {
+  const r = run(threatChange(T1, { "tasks.md": SEC_TASKS.replace(" [security]", "") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /covers threat T1 but has no task tagged \[security\]/);
+});
+
+test("threat ids match case-insensitively", () => {
+  const r = run(threatChange(T1.replace("T1", "t1"), { "tasks.md": SEC_TASKS }));
+  assert.strictEqual(r.code, 0, r.out);
+});
+
+// ---------------------------------------------------------------------------
+// proposal size and shape (WARN only)
+// ---------------------------------------------------------------------------
+
+const words = (n) => Array.from({ length: n }, (_, i) => "word" + i).join(" ");
+
+test("proposal over the word ceiling is a WARN, not an ERROR", () => {
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL.replace("Problem statement.", words(300) + "\n\n" + words(300) + "\n\n" + words(300) + "\n\n" + words(300) + "\n\n" + words(300)) }));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /WARN proposal\.md\s+proposal\.md is \d+ words, over the 1500-word ceiling/);
+});
+
+test("words inside HTML comments do not count toward the ceiling", () => {
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL + "\n<!-- " + words(2000) + " -->\n" }));
+  assert.doesNotMatch(r.out, /ceiling/);
+});
+
+test("a paragraph over 100 words is a WARN", () => {
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL.replace("Problem statement.", words(120)) }));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /paragraph or bullet of 120 words/);
+});
+
+test("a bullet over 100 words is a WARN, counting its continuation lines", () => {
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL.replace("- Add data export.", "- " + words(60) + "\n  " + words(60)) }));
+  assert.match(r.out, /paragraph or bullet of 120 words/);
+});
+
+test("a code fence in the proposal is a WARN", () => {
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL.replace("Problem statement.", "Problem.\n\n```js\nfoo();\n```") }));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /code fence in proposal\.md/);
+});
+
+test("more than 5 bullets under Assumptions & Open Questions is a WARN", () => {
+  const bullets = Array.from({ length: 6 }, (_, i) => "- Question " + i).join("\n");
+  const r = run(goodChange({ "proposal.md": GOOD_PROPOSAL.replace("## External Dependencies", "## Assumptions & Open Questions\n\n" + bullets + "\n\n## External Dependencies") }));
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /Assumptions & Open Questions has 6 bullets/);
+});
+
+test("optional Assumptions & Open Questions and Out of Scope sections are accepted", () => {
+  const r = run(
+    goodChange({
+      "proposal.md": GOOD_PROPOSAL.replace(
+        "## External Dependencies",
+        "## Assumptions & Open Questions\n\n- Exports stay under 100 MB.\n\n## Out of Scope\n\n- PDF export, deferred.\n\n## External Dependencies"
+      ),
+    })
+  );
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /OK - no structural findings/);
+});
+
+test("the size facts line reports capabilities, scenarios, task groups, and proposal words", () => {
+  const r = run(goodChange());
+  assert.match(r.out, /Size facts: 1 capabilities, 1 scenarios, 2 task groups, proposal \d+ words/);
+});
+
+test("--phase=proposal checks proposal.md only, so missing later artifacts are not errors", () => {
+  const dir = mk({ "proposal.md": GOOD_PROPOSAL });
+  const r = run(dir, null, "--phase=proposal");
+  assert.strictEqual(r.code, 0, r.out);
+  assert.match(r.out, /Size facts: 0 capabilities, 0 scenarios, 0 task groups/);
+});
+
+test("--phase=proposal still reports proposal errors and warnings", () => {
+  const dir = mk({ "proposal.md": GOOD_PROPOSAL.replace("## Impact", "## Nope").replace("Problem statement.", words(120)) });
+  const r = run(dir, null, "--phase=proposal");
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /missing "## Impact" section/);
+  assert.match(r.out, /paragraph or bullet of 120 words/);
+});
+
+test("an unknown flag or phase exits 2 with usage", () => {
+  const r = run(goodChange(), null, "--phase=design");
+  assert.strictEqual(r.code, 2);
+  assert.match(r.out, /Usage: node lint\.cjs/);
 });

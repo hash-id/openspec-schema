@@ -1,6 +1,6 @@
 ---
 name: plain-language-writing
-description: "Two writing rule sets for readers who may not read English fluently: COMMS for live agent-to-user text (interview questions, confirmations, blockers), ARTIFACT for persistent artifact prose (discovery.md, proposal.md, specs, design.md). A caller states which set applies. Evidence backing is in docs/research/2026-08-07-plain-language-non-native-readers.md."
+description: "Two writing rule sets for readers who may not read English fluently: COMMS for live agent-to-user text (interview questions, confirmations, blockers), ARTIFACT for persistent artifact prose (proposal.md, specs, design.md). A caller states which set applies. Evidence backing is in docs/research/2026-08-07-plain-language-non-native-readers.md."
 ---
 
 # plain-language-writing
@@ -43,10 +43,10 @@ Interview questions, confirmation/recap prompts, status updates, walkthrough que
 
 ## ARTIFACT — persistent artifact prose
 
-Free-running prose in discovery.md, proposal.md, specs/\*.md, design.md, tasks.md, align.md. Never overrides the structural formats those artifacts already mandate (`### Requirement` / `#### Scenario` blocks, WHEN/THEN, checkbox syntax, delta-operation headers, SHALL/MUST usage).
+Free-running prose in proposal.md, specs/\*.md, design.md, tasks.md, align.md. Never overrides the structural formats those artifacts already mandate (`### Requirement` / `#### Scenario` blocks, WHEN/THEN, checkbox syntax, delta-operation headers, SHALL/MUST usage).
 
 1. **No vague or escape-clause words.** Avoid "adequate," "reasonable," "as appropriate," "where possible," "etc." State a measurable criterion or an explicit list instead.
 2. **One obligation or decision per sentence.** Don't join two requirements or decisions with "and/or."
 3. **No ambiguous pronoun.** Same condition as COMMS #4.
-4. **Normative keywords stay in requirement blocks.** SHALL/MUST/SHOULD in ALL CAPS only inside an actual `### Requirement` statement — never capitalized in narrative prose (discovery.md, design.md rationale).
-5. **One term per concept.** Reuse the same name across discovery.md, proposal.md, specs/\*.md, design.md, and tasks.md — don't drift between synonyms (e.g. "user" / "actor" / "consumer").
+4. **Normative keywords stay in requirement blocks.** SHALL/MUST/SHOULD in ALL CAPS only inside an actual `### Requirement` statement — never capitalized in narrative prose (proposal.md, design.md rationale).
+5. **One term per concept.** Reuse the same name across proposal.md, specs/\*.md, design.md, and tasks.md — don't drift between synonyms (e.g. "user" / "actor" / "consumer").

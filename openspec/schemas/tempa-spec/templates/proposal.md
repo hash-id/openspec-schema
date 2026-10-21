@@ -1,10 +1,10 @@
 ## Why
 
-<!-- Explain the motivation for this change. What problem does this solve? Why now? -->
+<!-- The problem or opportunity, and the outcome that means this change succeeded, in 1-3 sentences. Why now? -->
 
 ## What Changes
 
-<!-- Describe what will change. Be specific about new capabilities, modifications, or removals. -->
+<!-- Describe what will change. Be specific about new capabilities, modifications, or removals. Put the reason for each scope decision beside its bullet. -->
 
 ## Capabilities
 
@@ -29,3 +29,13 @@
 ## Impact
 
 <!-- Affected code, APIs, dependencies, systems -->
+
+<!-- Optional sections below: delete the heading and its comment when empty. -->
+
+## Assumptions & Open Questions
+
+<!-- Product-level assumptions and unanswered scope questions only, at most 5 bullets. Technical unknowns go to design.md's Open Questions. -->
+
+## Out of Scope
+
+<!-- Slices deferred by the change-size rule (one line each, with why), and a rejected scope alternative only where someone would otherwise re-open it. Rejected technical alternatives go to design.md's Decisions. -->

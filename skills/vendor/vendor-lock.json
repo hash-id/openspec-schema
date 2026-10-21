@@ -52,20 +52,6 @@
         "SKILL.md": "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4",
         "agents/openai.yaml": "9b4c470d63221c1f68f22df70b83e2f12401b317babe0d1b7b5f24a974474d0d"
       }
-    },
-    "humanizer": {
-      "source": "blader/humanizer",
-      "sourceType": "github",
-      "sourceRef": "main",
-      "sourceCommit": "e2e92e7b4b8229253ed5c8e81dc65463fdeddda5",
-      "sourcePath": ".",
-      "license": "MIT",
-      "files": {
-        "SKILL.md": "14fc8a965b6e0a8dc100ba4dffeab55cb94bbac112abbde7e014d5c15a35c202"
-      },
-      "only": [
-        "SKILL.md"
-      ]
     }
   }
 }

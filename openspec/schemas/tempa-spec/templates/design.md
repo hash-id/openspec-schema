@@ -27,7 +27,8 @@
 ## Risks / Trade-offs
 
 <!-- Known risks and trade-offs. Format: [Risk] → Mitigation.
-     Security (per the `hrt-security-pass` skill): one line per threat, `[Threat: <category>, <High|Medium|Low>] → Mitigation (<source>)`,
+     Security (per the `hrt-security-pass` skill): one line per threat, `[Threat T<n>: <category>, <High|Medium|Low>] → Mitigation (<source>)`,
+     with a unique id that tasks.md cites in a group's `Covers:` line,
      or the single line `Security pass: skipped - <reason>` when no trust boundary is touched. -->
 
 ## Migration Plan

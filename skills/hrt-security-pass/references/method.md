@@ -44,12 +44,14 @@ Leave out: denial of service unless availability is a stated goal, threats that 
 
 **In `design`**, in Risks / Trade-offs, one line per threat:
 
-`[Threat: <category>, <High|Medium|Low>] → <mitigation> (<source>)`
+`[Threat T<n>: <category>, <High|Medium|Low>] → <mitigation> (<source>)`
+
+The id (T1, T2, ...) is unique in the file. `tasks` cites it in a group's `Covers:` line.
 
 - Severity: High = reachable by an unauthenticated or low-privilege caller, or exposes secrets, personal data, or money. Low = needs unusual preconditions or a privileged caller. Medium = the rest.
 - Source: a category id from the reference you used (for example `A01:2025`, `API1:2023`), a CWE id, or the name of an OWASP Cheat Sheet. Use only ids that appear in a reference file or that you can verify. Leave the source out rather than invent one.
 - If the project's `context:` names a standard it works to (for example an ASVS level or PCI DSS), also cite that standard's requirement ids, but only ones you can read in the project's own documents.
-- Every threat that belongs to a capability must trace to a negative scenario in that capability's spec. If it does not, specs missed it: `design` may append the scenario to that spec file now (all planning artifacts are still drafts) and say so in one line. A change-level threat that fits no capability (a new dependency, a secret) needs no scenario; `tasks` still needs a task for it.
+- Every threat that belongs to a capability should trace to a negative scenario in that capability's spec. If there is none, specs missed it: `design` may append the scenario to that spec file now (all planning artifacts are still drafts) and say so in one line. A change-level threat that fits no capability (a new dependency, a secret in the repository) needs no scenario: name the scanner, license check, or other command that shows it is handled in the mitigation text. Either way, `tasks` lists the threat id in a group's `Covers:` line and that group carries a task tagged `[security]`; `hrt-artifact-lint` fails a threat id no group covers.
 
 ## 4. In `apply` (code review)
 

@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  <img alt="Schema version" src="https://img.shields.io/badge/schema-v8-blue.svg">
+  <img alt="Schema version" src="https://img.shields.io/badge/schema-v15-blue.svg">
   <img alt="Requires" src="https://img.shields.io/badge/requires-OpenSpec_%2B_git_%2B_Node.js-lightgrey.svg">
 </p>
 
@@ -16,10 +16,10 @@
 
 *Tempa* — Indonesian for forging: heating, hammering, folding, repeated until the metal holds. A blade forged this way develops *pamor*, a pattern that only appears when the process was done right — it cannot be shortcut. This schema treats specs the same way.
 
-The default OpenSpec pipeline (`proposal -> specs -> design -> tasks -> apply`) takes the agent's self-report at face value: it produces an artifact, checks a box, moves on. `tempa-spec` doesn't. It adds a relentless interview before anything gets proposed, a human-gated consistency pass before implementation starts, and a strict TDD-plus-review discipline before a task counts as done — three places where the default schema just trusts and `tempa-spec` makes the agent show its work.
+The default OpenSpec pipeline (`proposal -> specs -> design -> tasks -> apply`) takes the agent's self-report at face value: it produces an artifact, checks a box, moves on. `tempa-spec` doesn't. It adds a capped interview before anything gets proposed, a human-gated consistency pass before implementation starts, and a strict TDD-plus-review discipline before a task counts as done — three places where the default schema just trusts and `tempa-spec` makes the agent show its work.
 
 ```
-discovery -> proposal -> { specs, design } -> tasks -> align -> apply (TDD + review)
+proposal -> { specs, design } -> tasks -> align -> apply (TDD + review)
 ```
 
 ---
@@ -28,12 +28,11 @@ discovery -> proposal -> { specs, design } -> tasks -> align -> apply (TDD + rev
 
 | Phase              | Produces                 | What it does                                                                                                         |
 | ------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| **`discovery`** ✨ | `discovery.md`           | Relentless interview before any proposal exists — reasoning log of decisions, rejected alternatives, open questions. |
-| `proposal`         | `proposal.md`            | Why + what + affected capabilities. Adversarially reviewed.                                                          |
+| `proposal`         | `proposal.md`            | A short interview (4 questions a round, 4 rounds at most), then why + what + affected capabilities. Checked by the lint and your read-and-confirm. |
 | `specs`            | `specs/**/*.md`          | Testable WHEN/THEN scenarios, one file per capability. Adversarially reviewed.                                       |
-| `design`           | `design.md`              | How to implement — decisions, trade-offs, migration. Created only when warranted.                                    |
-| `tasks`            | `tasks.md`               | Checkbox list traced back to spec scenarios and design risks.                                                        |
-| **`align`** ✨     | `align.md`               | Automated checks + human walkthrough, uncapped, until a round is clean or the human signs off. Runs before `apply`.  |
+| `design`           | `design.md`              | How to implement — decisions, seams, trade-offs, migration. Adversarially reviewed.                                  |
+| `tasks`            | `tasks.md`               | Checkbox groups, each naming the scenarios it delivers (`Covers:`); the lint checks every scenario and threat is covered. |
+| **`align`** ✨     | `align.md`               | Automated checks + a human walkthrough led by specs and design, until a round is clean or the human signs off. Runs before `apply`. |
 | `apply`            | code (tracks `tasks.md`) | Strict TDD, one task at a time, then a separate spec-vs-code review (up to 3 passes, findings to screen).            |
 
 ✨ = no equivalent in the default OpenSpec schema.
@@ -68,7 +67,7 @@ Local only (no global/user dir). Re-run to update.
 
 ```bash
 openspec new change <name>          # uses tempa-spec as default
-openspec instructions discovery --change <name>
+openspec instructions proposal --change <name>
 openspec instructions align   --change <name>
 openspec instructions apply   --change <name>
 ```

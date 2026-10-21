@@ -4,15 +4,19 @@
 // cheap one - does slowly and unreliably: hashtag counts, checkbox format,
 // delta-operation headers, capability <-> spec-file correspondence,
 // Covers: target existence, design.md section presence, unverified
-// External Dependencies rows, tasks.md group graph (Depends on).
+// External Dependencies rows, tasks.md group graph (Depends on), task
+// coverage (Covers: per group, both directions, scenario names and threat ids),
+// proposal size and shape (WARN only).
 //
 // It does NOT make judgement calls (is this scenario really behaviour? is
 // this requirement testable?) - those stay with the review subagents.
 //
-// Usage: node lint.cjs <change-dir> [openspec-specs-dir]
+// Usage: node lint.cjs <change-dir> [openspec-specs-dir] [--phase=proposal]
 //   <change-dir>          directory holding proposal.md, specs/, design.md, tasks.md
 //   [openspec-specs-dir]  optional; openspec/specs/ for resolving existing
 //                         capability names on MODIFIED capabilities
+//   --phase=proposal      check proposal.md only (structure, size, shape), for the
+//                         proposal phase when no later artifact exists yet
 //
 // Exit code: 0 if no ERROR findings, 1 if any ERROR. WARN findings never
 // change the exit code. A caller that treats any non-zero exit as fatal is
@@ -22,9 +26,12 @@
 const fs = require("fs");
 const path = require("path");
 
-const [, , changeDir, specsDir] = process.argv;
-if (!changeDir) {
-  console.error("Usage: node lint.cjs <change-dir> [openspec-specs-dir]");
+const flags = process.argv.slice(2).filter((a) => a.startsWith("--"));
+const [changeDir, specsDir] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const phaseFlag = flags.find((f) => f.startsWith("--phase="));
+const proposalOnly = phaseFlag === "--phase=proposal";
+if (!changeDir || (phaseFlag && !proposalOnly) || flags.length > (phaseFlag ? 1 : 0)) {
+  console.error("Usage: node lint.cjs <change-dir> [openspec-specs-dir] [--phase=proposal]");
   process.exit(2);
 }
 
@@ -323,6 +330,78 @@ function parseProposal(file, text) {
   return caps;
 }
 
+// Proposal size and shape (WARN only, never an ERROR). The values are untested
+// starting points, tuned later from real proposals. The ceiling catches
+// outliers; the shape rules catch bloat (a long block, a code fence), not length. Completeness is the interview
+// checklist and the user's read-and-confirm, which a script cannot judge.
+const PROPOSAL_MAX_WORDS = 1500;
+const BLOCK_MAX_WORDS = 100;
+const OPEN_QUESTIONS_MAX_BULLETS = 5;
+
+function wordCount(s) {
+  return (s.match(/\S+/g) || []).length;
+}
+
+function lintProposalShape(file, text) {
+  const stripped = stripComments(text);
+  const ls = lines(stripped);
+  const total = wordCount(stripped);
+  if (total > PROPOSAL_MAX_WORDS) {
+    warn(file, 0, `proposal.md is ${total} words, over the ${PROPOSAL_MAX_WORDS}-word ceiling - move detail to design.md or specs`);
+  }
+
+  let section = null;
+  let inFence = false;
+  let block = null;
+  const longBlocks = [];
+  let openBullets = 0;
+  const flush = () => {
+    if (block && block.words > BLOCK_MAX_WORDS) longBlocks.push(block);
+    block = null;
+  };
+
+  for (let i = 0; i < ls.length; i++) {
+    const n = i + 1;
+    const l = ls[i];
+    const h2 = l.match(/^##\s+(.*?)\s*$/);
+    if (h2) {
+      flush();
+      section = h2[1].trim();
+      continue;
+    }
+    if (/^\s*```/.test(l)) {
+      flush();
+      if (!inFence) warn(file, n, "code fence in proposal.md - implementation detail belongs in design.md");
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    if (!/\S/.test(l) || /^#{1,6}\s/.test(l) || /^\s*\|/.test(l)) {
+      flush();
+      continue;
+    }
+
+    const bullet = l.match(/^(\s*)[-*]\s+(.*)$/);
+    if (bullet) {
+      flush();
+      block = { line: n, words: wordCount(bullet[2]) };
+      if (section === "Assumptions & Open Questions" && bullet[1].length < 2) openBullets++;
+    } else if (block) {
+      block.words += wordCount(l);
+    } else {
+      block = { line: n, words: wordCount(l) };
+    }
+  }
+  flush();
+
+  for (const b of longBlocks) {
+    warn(file, b.line, `paragraph or bullet of ${b.words} words (over ${BLOCK_MAX_WORDS}) - split it or move detail to design.md`);
+  }
+  if (openBullets > OPEN_QUESTIONS_MAX_BULLETS) {
+    warn(file, 0, `Assumptions & Open Questions has ${openBullets} bullets (over ${OPEN_QUESTIONS_MAX_BULLETS}) - settle questions in the interview, keep technical unknowns in design.md`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // design.md
 // ---------------------------------------------------------------------------
@@ -383,7 +462,7 @@ function lintDesign(file, text, specCoversNames) {
 // Security gate (WARN only): proposal/specs mention a trust-boundary keyword but
 // design.md's Risks / Trade-offs has neither a "[Threat ...]" entry nor a
 // "Security pass: skipped - <reason>" line. Also checks each threat line carries
-// "[Threat: <category>, <High|Medium|Low>]". Keywords are a deliberate nudge, not
+// "[Threat T<n>: <category>, <High|Medium|Low>]". Keywords are a deliberate nudge, not
 // a proof: the judgement of whether the boundary is real stays with align.
 const TRUST_KEYWORDS = /\b(authenticat\w*|authoriz\w*|login|password|passphrase|credential\w*|api[ -]key|oauth|sso|jwt|bearer|(?:access|auth|refresh|session|api) token|session (?:id|cookie|fixation)|cookie|secrets?|privilege\w*|upload\w*|deserializ\w*|webhook\w*|pii|personal data|encrypt\w*|untrusted|llm|prompt injection)\b/gi;
 
@@ -394,16 +473,36 @@ function lintSecurityGate(file, designText, planText) {
   const threatLines = risks.split(/\r?\n/).filter((l) => /\[Threat\b/.test(l));
   const skipped = /Security pass:\s*skipped\s*-\s*\S.{7,}/i.test(risks);
   if (!threatLines.length && !skipped) {
-    warn(file, 0, `possible trust boundary (matched: ${hits.slice(0, 5).join(", ")}) but Risks / Trade-offs has no "[Threat: <category>, <severity>] →" entry and no "Security pass: skipped - <reason>" line`);
+    warn(file, 0, `possible trust boundary (matched: ${hits.slice(0, 5).join(", ")}) but Risks / Trade-offs has no "[Threat T<n>: <category>, <severity>] →" entry and no "Security pass: skipped - <reason>" line`);
   }
   if (skipped && threatLines.length) {
     warn(file, 0, 'Risks / Trade-offs has both a "Security pass: skipped" line and "[Threat" entries - pick one');
   }
   for (const l of threatLines) {
-    if (!/\[Threat:\s*[^,\]]+,\s*(High|Medium|Low)\s*\]/i.test(l)) {
-      warn(file, 0, `threat line should read "[Threat: <category>, <High|Medium|Low>] → Mitigation": ${l.trim().slice(0, 60)}`);
+    if (!/\[Threat(?:\s+T\d+)?:\s*[^,\]]+,\s*(High|Medium|Low)\s*\]/i.test(l)) {
+      warn(file, 0, `threat line should read "[Threat T<n>: <category>, <High|Medium|Low>] → Mitigation": ${l.trim().slice(0, 60)}`);
     }
   }
+}
+
+// Threat ids: every "[Threat ...]" line in Risks / Trade-offs carries a unique id,
+// "[Threat T1: <category>, <severity>] -> ...". A tasks.md group names the id in
+// its "Covers:" line, and lintTaskCoverage matches by id. Returns the ids found.
+function lintThreatIds(file, designText) {
+  const risks = sectionBodies(lines(stripComments(designText)))["Risks / Trade-offs"] || "";
+  const ids = [];
+  for (const l of risks.split(/\r?\n/)) {
+    if (!/\[Threat\b/.test(l)) continue;
+    const m = l.match(/\[Threat\s+(T\d+)\s*:/i);
+    if (!m) {
+      err(file, 0, `threat has no id - write "[Threat T<n>: <category>, <severity>]": ${l.trim().slice(0, 60)}`);
+      continue;
+    }
+    const id = m[1].toUpperCase();
+    if (ids.includes(id)) err(file, 0, `threat id ${id} is used twice`);
+    else ids.push(id);
+  }
+  return ids;
 }
 
 function sectionBodies(ls) {
@@ -496,6 +595,78 @@ function lintTaskGraph(file, text) {
   }
 }
 
+// Coverage: each group states "Covers: <scenario>; <scenario>" (or "Covers: none"
+// for a structure-only group: prefactor, expand/migrate/contract) before its first
+// checkbox. Checked in both directions: every scenario in specs/** is covered by
+// some group, and every name a group lists is a real scenario. A name of the form
+// T<n> is a threat id from design.md: every threat id must be listed by some group,
+// and that group must carry a task tagged [security].
+function lintTaskCoverage(file, text, scenarios, threatIds) {
+  const ls = lines(stripComments(text));
+  const groups = [];
+  let cur = null;
+  for (let i = 0; i < ls.length; i++) {
+    const n = i + 1;
+    const h = ls[i].match(/^##\s+(\d+)\.(?:\s|$)/);
+    if (h) {
+      cur = { id: Number(h[1]), line: n, covers: null, open: true, security: false };
+      groups.push(cur);
+      continue;
+    }
+    if (/^##\s/.test(ls[i])) {
+      cur = null;
+      continue;
+    }
+    if (!cur) continue;
+    if (/^\s*[-*]\s*\[[ xX]\].*\[security\]/i.test(ls[i])) cur.security = true;
+    if (/^\s*[-*]\s*\[[ xX]\]/.test(ls[i])) cur.open = false;
+    if (!cur.open) continue;
+    const m = ls[i].match(/^Covers:\s*(.*?)\s*$/i);
+    if (m) cur.covers = m[1];
+  }
+
+  const byName = new Map(scenarios.map((s) => [s.name.toLowerCase(), s]));
+  const covered = new Set();
+  const coveredThreats = new Set();
+  for (const g of groups) {
+    if (g.covers == null) {
+      err(file, g.line, `group ${g.id} has no "Covers:" line - list the scenarios it delivers, or "Covers: none" for a structure-only group`);
+      continue;
+    }
+    if (!g.covers.trim()) {
+      err(file, g.line, `group ${g.id} has an empty "Covers:" line`);
+      continue;
+    }
+    if (/^none$/i.test(g.covers.trim())) continue;
+    for (const raw of g.covers.split(";")) {
+      const name = raw.trim();
+      if (!name) continue;
+      if (/^T\d+$/i.test(name)) {
+        const id = name.toUpperCase();
+        if (!threatIds.includes(id)) {
+          err(file, g.line, `group ${g.id} "Covers: ${name}" names no threat in design.md Risks / Trade-offs`);
+        } else {
+          coveredThreats.add(id);
+          if (!g.security) err(file, g.line, `group ${g.id} covers threat ${id} but has no task tagged [security] - add the task that implements or runs its mitigation check`);
+        }
+      } else if (byName.has(name.toLowerCase())) covered.add(name.toLowerCase());
+      else err(file, g.line, `group ${g.id} "Covers: ${name}" names no scenario found in specs/**`);
+    }
+  }
+  if (groups.length) {
+    for (const s of scenarios) {
+      if (!covered.has(s.name.toLowerCase())) {
+        err(s.file, s.line, `scenario "${s.name}" is covered by no task group - add it to a group's "Covers:" line`);
+      }
+    }
+  }
+  if (groups.length) {
+    for (const id of threatIds) {
+      if (!coveredThreats.has(id)) err(file, 0, `threat ${id} is covered by no task group - add it to a group's "Covers:" line`);
+    }
+  }
+}
+
 function lintTasks(file, text) {
   const ls = lines(text);
   let currentHeading = null;
@@ -549,12 +720,13 @@ if (!fs.existsSync(changeDir) || !fs.statSync(changeDir).isDirectory()) {
 }
 
 const specCoversNames = [];
+const scenarios = [];
 let planText = "";
 
 // specs
 const specsRoot = path.join(changeDir, "specs");
 const specFiles = [];
-if (fs.existsSync(specsRoot)) {
+if (!proposalOnly && fs.existsSync(specsRoot)) {
   for (const dirent of fs.readdirSync(specsRoot, { withFileTypes: true })) {
     if (dirent.isDirectory()) {
       const sp = path.join(specsRoot, dirent.name, "spec.md");
@@ -577,6 +749,10 @@ for (const sf of specFiles) {
     const r = l.match(/^#{3,4}\s*(Requirement|Scenario):\s*(.+)$/);
     if (r) specCoversNames.push(r[2].trim());
   }
+  lines(text).forEach((l, idx) => {
+    const sc = l.match(/^#{1,6}\s*Scenario:\s*(.+)$/);
+    if (sc) scenarios.push({ name: sc[1].trim(), file: rel(sf.path), line: idx + 1 });
+  });
 }
 
 // proposal
@@ -586,38 +762,45 @@ if (proposalText == null) {
   err("proposal.md", 0, "proposal.md not found in change dir");
 } else {
   caps = parseProposal("proposal.md", proposalText);
+  lintProposalShape("proposal.md", proposalText);
 }
 
-// proposal <-> spec-file correspondence
-const specCapNames = new Set(specFiles.map((s) => s.cap));
-const proposalCapNames = new Set([...caps.new, ...caps.modified].map((c) => c.name));
-for (const c of caps.new) {
-  if (!specCapNames.has(c.name)) {
-    err("proposal.md", c.line, `New Capability "${c.name}" has no specs/${c.name}/spec.md`);
+let tasksText = null;
+if (!proposalOnly) {
+  // proposal <-> spec-file correspondence
+  const specCapNames = new Set(specFiles.map((s) => s.cap));
+  const proposalCapNames = new Set([...caps.new, ...caps.modified].map((c) => c.name));
+  for (const c of caps.new) {
+    if (!specCapNames.has(c.name)) {
+      err("proposal.md", c.line, `New Capability "${c.name}" has no specs/${c.name}/spec.md`);
+    }
   }
-}
-for (const sf of specFiles) {
-  if (!proposalCapNames.has(sf.cap)) {
-    err(rel(sf.path), 0, `spec file for "${sf.cap}" has no matching capability in proposal.md Capabilities`);
+  for (const sf of specFiles) {
+    if (!proposalCapNames.has(sf.cap)) {
+      err(rel(sf.path), 0, `spec file for "${sf.cap}" has no matching capability in proposal.md Capabilities`);
+    }
   }
-}
 
-// design
-const designText = readIf(path.join(changeDir, "design.md"));
-if (designText == null) {
-  err("design.md", 0, "design.md not found - it is mandatory for every change");
-} else {
-  lintDesign("design.md", designText, specCoversNames);
-  lintSecurityGate("design.md", designText, planText + "\n" + (proposalText || ""));
-}
+  // design
+  let threatIds = [];
+  const designText = readIf(path.join(changeDir, "design.md"));
+  if (designText == null) {
+    err("design.md", 0, "design.md not found - it is mandatory for every change");
+  } else {
+    lintDesign("design.md", designText, specCoversNames);
+    lintSecurityGate("design.md", designText, planText + "\n" + (proposalText || ""));
+    threatIds = lintThreatIds("design.md", designText);
+  }
 
-// tasks
-const tasksText = readIf(path.join(changeDir, "tasks.md"));
-if (tasksText == null) {
-  err("tasks.md", 0, "tasks.md not found in change dir");
-} else {
-  lintTasks("tasks.md", tasksText);
-  lintTaskGraph("tasks.md", tasksText);
+  // tasks
+  tasksText = readIf(path.join(changeDir, "tasks.md"));
+  if (tasksText == null) {
+    err("tasks.md", 0, "tasks.md not found in change dir");
+  } else {
+    lintTasks("tasks.md", tasksText);
+    lintTaskGraph("tasks.md", tasksText);
+    lintTaskCoverage("tasks.md", tasksText, scenarios, threatIds);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -642,5 +825,12 @@ if (findings.length === 0) {
 } else {
   console.log(`\n${errCount} error(s), ${warnCount} warning(s)`);
 }
+
+// Size facts, no verdict: the align walkthrough quotes this line.
+const groupCount = tasksText == null ? 0 : (stripComments(tasksText).match(/^##\s+\d+\.(?:\s|$)/gm) || []).length;
+const proposalWords = proposalText == null ? 0 : wordCount(stripComments(proposalText));
+console.log(
+  `Size facts: ${specFiles.length} capabilities, ${scenarios.length} scenarios, ${groupCount} task groups, proposal ${proposalWords} words`
+);
 
 process.exit(errCount > 0 ? 1 : 0);
