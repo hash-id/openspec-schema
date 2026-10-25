@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 16
+version: 17
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: proposal
