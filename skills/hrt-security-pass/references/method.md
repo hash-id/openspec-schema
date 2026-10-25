@@ -56,4 +56,4 @@ The id (T1, T2, ...) is unique in the file. `tasks` cites it in a group's `Cover
 
 ## 4. In `apply` (code review)
 
-`hrt-apply-code-review` runs this on the diff. Pick the surfaces from the changed files (section 1), read the matching reference files, and check the changed code against each category. Report only what is exploitable or concretely dangerous in the changed code, and never what section 2 says to leave out. There is no threat list to write: the findings go through the review's own severity rules.
+`hrt-apply-code-review` runs this on the diff. Pick the surfaces from the changed files (section 1), read the matching reference files, and check the changed code against each category. Report only what is exploitable or concretely dangerous in the changed code, and never what section 2 says to leave out. There is no threat list to write: the findings go through the review's own severity rules. If step 1 of the review ran the opengrep rules in `../opengrep/`, use their candidates as pointers to where to look, not as findings.

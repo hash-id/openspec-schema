@@ -1,0 +1,133 @@
+# Candidates for hrt-apply-code-review step 1 (the opengrep scan is required when the diff touches a covered file).
+# Python and JavaScript/TypeScript only: the ecosystems this schema is used on. For any other language
+# these rules match nothing, and a clean run says nothing about that code.
+# Every rule is a CANDIDATE for the reviewer, never a finding by itself, and none has been measured on
+# real repositories yet. Each one is a construct that is nearly always worth a second look.
+# Tests: scripts/fixtures/opengrep-rules/ (run by scripts/opengrep-rules.test.cjs).
+rules:
+  - id: py-shell-with-built-command
+    languages: [python]
+    severity: WARNING
+    message: A shell command that is not a fixed string. If any part comes from a user, pass an argument list without shell=True.
+    patterns:
+      - pattern-either:
+          - pattern: subprocess.$F($CMD, ..., shell=True, ...)
+          - pattern: os.system($CMD)
+          - pattern: os.popen($CMD, ...)
+      - pattern-not: subprocess.$F("...", ..., shell=True, ...)
+      - pattern-not: os.system("...")
+      - pattern-not: os.popen("...", ...)
+  - id: py-unsafe-deserialize
+    languages: [python]
+    severity: WARNING
+    message: pickle, marshal and yaml.load without a safe loader can run code when the data comes from outside. Use json, or yaml.safe_load.
+    patterns:
+      - pattern-either:
+          - pattern: pickle.load(...)
+          - pattern: pickle.loads(...)
+          - pattern: marshal.loads(...)
+          - pattern: yaml.load(...)
+      - pattern-not: yaml.load(..., Loader=yaml.SafeLoader)
+      - pattern-not: yaml.load(..., Loader=SafeLoader)
+      - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader)
+  - id: py-eval-exec-built-code
+    languages: [python]
+    severity: WARNING
+    message: eval or exec on something that is not a fixed string. Use ast.literal_eval or json.loads for plain data.
+    patterns:
+      - pattern-either:
+          - pattern: eval($X, ...)
+          - pattern: exec($X, ...)
+      - pattern-not: eval("...", ...)
+      - pattern-not: exec("...", ...)
+  - id: py-db-execute-built-string
+    languages: [python]
+    severity: WARNING
+    message: A query built as a string. Pass values as parameters. A table or column name taken from _table or a constant, and a list of %s placeholders, are fine.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.execute(f"...{$X}...", ...)
+          - pattern: $DB.execute("..." % $X, ...)
+          - pattern: $DB.execute("...".format(..., $X, ...), ...)
+          - pattern: $DB.execute(<... "..." + $X ...>, ...)
+          - pattern: $DB.executemany(f"...{$X}...", ...)
+          - pattern: $DB.raw(f"...{$X}...", ...)
+          - pattern: $DB.raw("..." % $X, ...)
+          - pattern: $DB.raw("...".format(..., $X, ...), ...)
+          - pattern: text(f"...{$X}...")
+      - metavariable-regex:
+          metavariable: $X
+          regex: ^(?!(?:\w*placeholders?\w*|[A-Z][A-Z0-9_]+|self\._table|\w*_table|\(self\._table\))$)
+    paths:
+      exclude: ["**/migrations/**"]
+  - id: py-tls-verify-off
+    languages: [python]
+    severity: WARNING
+    message: Certificate checking is turned off, so the connection can be read or changed by anyone on the path.
+    pattern-either:
+      - pattern: requests.$F(..., verify=False, ...)
+      - pattern: ssl._create_unverified_context(...)
+  - id: py-tempfile-mktemp
+    languages: [python]
+    severity: WARNING
+    message: tempfile.mktemp returns a name another process can take first. Use mkstemp or NamedTemporaryFile.
+    pattern: tempfile.mktemp(...)
+  - id: js-eval-built-code
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: eval or new Function on something that is not a fixed string.
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: new Function(..., $X)
+      - pattern-not: eval("...")
+      - pattern-not: new Function(..., "...")
+  - id: js-child-process-built-command
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: A shell command that is not a fixed string. If any part comes from a user, use execFile or spawn with an argument list.
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec($CMD, ...)
+          - pattern: child_process.execSync($CMD, ...)
+          - pattern: $CP.execSync($CMD, ...)
+      - pattern-not: child_process.exec("...", ...)
+      - pattern-not: child_process.execSync("...", ...)
+      - pattern-not: $CP.execSync("...", ...)
+  - id: js-dom-html-sink
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: HTML written from a value that is not a fixed string. If any part comes from a user, use textContent, or sanitise the HTML first.
+    patterns:
+      - pattern-either:
+          - pattern: $E.innerHTML = $X
+          - pattern: $E.outerHTML = $X
+          - pattern: document.write($X)
+          - pattern: "<$T dangerouslySetInnerHTML={{__html: $X}} />"
+      - pattern-not: $E.innerHTML = "..."
+      - pattern-not: $E.outerHTML = "..."
+      - pattern-not: document.write("...")
+      - pattern-not: "<$T dangerouslySetInnerHTML={{__html: \"...\"}} />"
+  - id: js-tls-verify-off
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Certificate checking is turned off, so the connection can be read or changed by anyone on the path.
+    pattern-either:
+      - pattern: "{..., rejectUnauthorized: false, ...}"
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+  - id: js-sql-built-string
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: A query or raw SQL fragment built with a template string or concatenation. Pass values as bindings (placeholders). A table or column name taken from a constant, and a list of ? placeholders, are fine.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.$M(`...${$X}...`, ...)
+          - pattern: $DB.$M(<... "..." + $X ...>, ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(query|raw|rawQuery|whereRaw|andWhereRaw|orWhereRaw|havingRaw|orderByRaw|groupByRaw|selectRaw|joinRaw|\$queryRawUnsafe|\$executeRawUnsafe)$
+      - metavariable-regex:
+          metavariable: $X
+          regex: ^(?!(?s:.*(placeholders?|\.map\(|\.fill\()).*$)(?![A-Z][A-Z0-9_]+$)(?!\W{0,2}this\.\w*[tT]able\b)
+    paths:
+      exclude: ["**/migrations/**"]

@@ -1,0 +1,43 @@
+# Odoo candidates for hrt-apply-code-review step 1 (the opengrep scan is required when the diff touches a covered file).
+# These match only Odoo constructs, so they find nothing in a repo that is not Odoo. A query built as a
+# string is covered by py-db-execute-built-string in common.yml (it also matches cr.execute).
+# Every rule is a CANDIDATE for the reviewer, never a finding by itself, and none has been measured on
+# real Odoo code yet. Each one restates a hint in ../references/odoo.md.
+# Tests: scripts/fixtures/opengrep-rules/ (run by scripts/opengrep-rules.test.cjs).
+rules:
+  - id: odoo-public-route-sudo
+    languages: [python]
+    severity: WARNING
+    message: This route has auth public or none and calls sudo(). Check the caller is identified (for example an access token) before data is read or written.
+    patterns:
+      - pattern: |
+          @http.route(..., auth="$AUTH", ...)
+          def $F(...):
+              ...
+              <... $X.sudo(...) ...>
+              ...
+      - metavariable-regex:
+          metavariable: $AUTH
+          regex: ^(public|none)$
+  - id: odoo-route-csrf-off
+    languages: [python]
+    severity: WARNING
+    message: csrf=False on a route. Confirm it is called by a program that has its own authentication, not by a browser session.
+    pattern: "@http.route(..., csrf=False, ...)"
+  - id: odoo-safe-eval
+    languages: [python]
+    severity: WARNING
+    message: safe_eval is only for trusted privileged users. Use ast.literal_eval or json.loads for plain data.
+    pattern: safe_eval(...)
+  - id: odoo-markup-fstring
+    languages: [python]
+    severity: WARNING
+    message: Markup built with an f-string, so values are not escaped. Use Markup with % or .format.
+    pattern: Markup(f"...")
+  - id: odoo-qweb-t-raw
+    languages: [generic]
+    severity: WARNING
+    message: t-raw never escapes. Use t-out with a Markup value.
+    pattern-regex: \bt-raw\s*=\s*(?!["']0["'])
+    paths:
+      include: ["*.xml"]

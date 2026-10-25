@@ -1,5 +1,7 @@
 # Odoo hints (Odoo 18 and later)
 
+A machine-checkable part of these hints sits in `../opengrep/odoo.yml`, and the raw SQL hint is also covered by `py-db-execute-built-string` in `../opengrep/common.yml`. `hrt-apply-code-review` runs them with `opengrep`, which is required when a change touches covered files. When you change a hint here, check whether its rule still says the same.
+
 For a repo or change with `__manifest__.py` on Odoo 18.0 or newer. Odoo is a web application and exposes JSON-RPC and XML-RPC, so also read `web-top10-2025.md`, `api-top10-2023.md`, and `cwe-top25-2025.md`. Each hint says where a category usually shows up in Odoo code. The category labels in parentheses are this skill's own mapping; the facts come from the sources below. These hints were not checked against Odoo 17 or earlier.
 
 - Model access (A01, API1, API5, CWE-862) [SEC]: every model needs `ir.model.access` rows. A row with an empty `group_id` is granted to every user, including portal and public users. If no row matches, the user has no access. Rights are additive across a user's groups.

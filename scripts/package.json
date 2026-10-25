@@ -6,6 +6,6 @@
     "yaml": "^2.6.0"
   },
   "scripts": {
-    "test": "node --test merge-config.test.cjs lint.test.cjs vendor-skills.test.cjs floor-guard.test.cjs"
+    "test": "node --test merge-config.test.cjs lint.test.cjs vendor-skills.test.cjs floor-guard.test.cjs opengrep-rules.test.cjs"
   }
 }

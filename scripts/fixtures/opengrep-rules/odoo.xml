@@ -1,0 +1,10 @@
+<odoo>
+  <template id="t1">
+    <!-- ruleid: odoo-qweb-t-raw -->
+    <div t-raw="body"/>
+    <!-- ok: odoo-qweb-t-raw -->
+    <div t-out="body"/>
+    <!-- ok: odoo-qweb-t-raw -->
+    <t t-raw="0"/>
+  </template>
+</odoo>

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Required opengrep rules in the `apply` review, for any repo.** `hrt-security-pass/opengrep/` has two rule files. `common.yml` (eleven rules, Python and JavaScript/TypeScript): a shell command that is not a fixed string, pickle/marshal/`yaml.load` without a safe loader, `eval`/`exec`/`new Function` on built code, a query built as a string, certificate checking turned off, `tempfile.mktemp`, an HTML sink written from a variable. `odoo.yml` (five rules, Odoo constructs only): public route with `sudo()`, `csrf=False`, `safe_eval`, `Markup` built with an f-string, `t-raw`. `hrt-apply-code-review` step 1 runs the folder over the diff. For any other language a clean run says nothing, and `mr-brief.md` says so.
+  - **Required** when the diff touches a `.py`, `.js`, `.jsx`, `.ts` or `.tsx` file, or an `.xml` file in an Odoo repo. If the `opengrep` command is missing, disabled, or exits with an error, that is an automatic HIGH, the review loop does not stop, and an unresolved one ends as a RELEASE BLOCKER. There is no skip, no waiver, and no exception in dark mode. The agent does not install it; the developer does (README has the commands, and the installer does not add it).
+  - Results are candidates, not findings: kept only if the changed code is exploitable, dismissed only with a one-line reason, never an automatic HIGH.
+  - Measured on five real repositories (two Odoo, three AdonisJS/TypeScript): the first version missed every Knex/Adonis `whereRaw` interpolation (0 hits in three repos, about 63 once fixed); other fixes are in the research doc, §4.2. The Semgrep registry packs, run on the same engine, did not report those interpolations. Per commit, the last 30 commits per repo gave 6 candidates in 150 commits, all false positives of the first version.
+  - The rules are local files; no registry is contacted. They passed their tests on opengrep 1.11.1 and 1.32.0.
+  - 4 new tests (`scripts/opengrep-rules.test.cjs`, 16 rule cases in the fixtures); the two that need the engine are skipped without opengrep.
+- Research: `docs/research/2026-10-25-sast-and-security-skills-landscape-evaluation.md`, eleven SAST and review repositories. Its recommendations R1 to R4 are not applied yet.
+
 ## 2026.10.25 — 2026-10-25 (schema v16)
 
 The `apply` review could not see an agent lowering the bar to get to green. A read-only scan of three downstream repositories found one real case: blanket `@ts-ignore` comments added to tests in apply commits, mentioned in no artifact or `mr-brief.md`. Taken from `addyosmani/agent-skills` after an evaluation of its 25 skills, an independent plan review, and that measurement (`docs/research/2026-10-25-addyosmani-agent-skills-evaluation.md`).
