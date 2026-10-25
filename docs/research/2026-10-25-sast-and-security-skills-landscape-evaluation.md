@@ -286,6 +286,8 @@ Total always-read increase on the `apply` path: about 1.1 KB on a skill set wher
 - **Conclusion for the choice of engine:** the value came from rules written for the stack's own idioms, not from a bigger rule library. Staying on `opengrep` costs nothing in coverage; Semgrep CE would add no capability that matters here (neither engine does cross-file taint in its free edition, per Semgrep's own comparison page). Registry packs stay an opt-in choice of each repository: they are licensed for internal use only (cannot be bundled), need the network at scan time, and added noise on these five repositories.
 - Limits of this measurement: five repositories, 150 commits, one reviewer (the author) judging candidates, and the rules were changed after the first run, so the final rules have not been run on a second, untouched set of commits.
 
+**Correction found in review, 2026-10-25.** The first form of step 1 used `--baseline-commit <base-branch>`. Tested on a branch with one commit, an unstaged edit, a staged new file and an untracked new file, it reported only the committed file and the staged one, with exit code 0 and no error, on both 1.11.1 and 1.32.0. A review runs before anything is committed, so it would have missed most of a change. Step 1 now lists the changed files itself (`git diff --name-only --diff-filter=d <base>` plus `git ls-files --others --exclude-standard`) and scans those. The per-commit simulation above is not affected: each commit was checked out cleanly before the scan.
+
 ### 4.3 Not adopted
 
 | Source | Why not | Standing cost avoided |

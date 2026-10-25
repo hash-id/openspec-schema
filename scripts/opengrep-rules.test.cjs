@@ -52,28 +52,55 @@ test("opengrep test passes on all fixtures", { skip: SKIP_ENGINE }, () => {
   assert.match(out.replace(/\x1b\[[0-9;]*m/g, ""), /All tests passed/);
 });
 
-test("--baseline-commit reports only what the change added", { skip: SKIP_ENGINE }, () => {
+
+// A change under review is not committed yet: a tracked file edited and not staged, a new file staged,
+// a new file not tracked, next to one commit on the branch. Returns the repo and the list of files the
+// review gives to opengrep (the same two git commands as in hrt-apply-code-review step 1).
+function dirtyRepo() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "opengrep-rules-git-"));
   const git = (...a) =>
     execFileSync("git", ["-C", dir, "-c", "commit.gpgsign=false", ...a], {
       encoding: "utf8",
       env: { ...ENV, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.invalid", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.invalid" },
     });
+  const put = (name, text) => fs.writeFileSync(path.join(dir, name), text);
   execFileSync("git", ["init", "-q", dir], { env: ENV });
   git("checkout", "-q", "-b", "main");
   fs.mkdirSync(path.join(dir, "rules"));
   for (const f of RULE_FILES) fs.copyFileSync(path.join(RULES_DIR, f), path.join(dir, "rules", f));
-  fs.writeFileSync(path.join(dir, "legacy.py"), 'def old(cr, n):\n    cr.execute(f"SELECT {n}")\n');
+  put("legacy.py", 'def old(cr, n):\n    cr.execute(f"SELECT {n}")\n');
+  put("edit_me.py", "x = 1\n");
   git("add", "-A");
   git("commit", "-q", "-m", "base");
-  fs.writeFileSync(path.join(dir, "feature.py"), 'def new(cr, n):\n    cr.execute(f"DELETE FROM t WHERE n={n}")\n');
-  git("add", "-A");
-  git("commit", "-q", "-m", "feature");
-  const out = execFileSync("opengrep", ["scan", "--config", "rules", "--baseline-commit", "HEAD~1", "--json", "--quiet", "."], {
-    cwd: dir,
-    encoding: "utf8",
-    env: ENV,
-  });
-  const files = JSON.parse(out).results.map((r) => r.path);
-  assert.deepStrictEqual(files, ["feature.py"]);
+  git("checkout", "-q", "-b", "feature");
+  put("committed.py", "import pickle\ndef a(b):\n    return pickle.loads(b)\n");
+  git("add", "committed.py");
+  git("commit", "-q", "-m", "committed");
+  put("edit_me.py", 'import os\ndef f(u):\n    os.system("ls " + u)\n'); // edited, not staged
+  put("staged_new.py", "import tempfile\nn = tempfile.mktemp()\n");
+  git("add", "staged_new.py"); // new, staged
+  put("untracked_new.py", 'import subprocess\ndef g(u):\n    subprocess.run(f"ls {u}", shell=True)\n'); // new, untracked
+  const names = (out) => out.split("\n").filter(Boolean);
+  const files = [
+    ...new Set([...names(git("diff", "--name-only", "--diff-filter=d", "main")), ...names(git("ls-files", "--others", "--exclude-standard"))]),
+  ].sort();
+  const scan = (...extra) =>
+    JSON.parse(
+      execFileSync("opengrep", ["scan", "--config", "rules", "--json", "--quiet", ...extra], { cwd: dir, encoding: "utf8", env: ENV }),
+    ).results.map((r) => r.path).sort();
+  return { files, scan };
+}
+
+test("scanning the changed files finds committed, unstaged, staged and untracked work, and skips untouched files", { skip: SKIP_ENGINE }, () => {
+  const { files, scan } = dirtyRepo();
+  assert.deepStrictEqual(files, ["committed.py", "edit_me.py", "staged_new.py", "untracked_new.py"]);
+  assert.deepStrictEqual(scan(...files), ["committed.py", "edit_me.py", "staged_new.py", "untracked_new.py"]);
+});
+
+// KNOWN GAP in opengrep (checked on 1.11.1 and 1.32.0): with --baseline-commit it reports nothing for an
+// edit that is not staged or a file that is not tracked, and it exits 0. This is why the review lists
+// the files itself. If a new opengrep fixes it, this test fails: then reconsider step 1.
+test("KNOWN GAP: --baseline-commit misses unstaged edits and untracked files", { skip: SKIP_ENGINE }, () => {
+  const { scan } = dirtyRepo();
+  assert.deepStrictEqual(scan("--baseline-commit", "main", "."), ["committed.py", "staged_new.py"]);
 });

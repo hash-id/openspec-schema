@@ -7,7 +7,8 @@
   - Results are candidates, not findings: kept only if the changed code is exploitable, dismissed only with a one-line reason, never an automatic HIGH.
   - Measured on five real repositories (two Odoo, three AdonisJS/TypeScript): the first version missed every Knex/Adonis `whereRaw` interpolation (0 hits in three repos, about 63 once fixed); other fixes are in the research doc, §4.2. The Semgrep registry packs, run on the same engine, did not report those interpolations. Per commit, the last 30 commits per repo gave 6 candidates in 150 commits, all false positives of the first version.
   - The rules are local files; no registry is contacted. They passed their tests on opengrep 1.11.1 and 1.32.0.
-  - 4 new tests (`scripts/opengrep-rules.test.cjs`, 16 rule cases in the fixtures); the two that need the engine are skipped without opengrep.
+  - 5 new tests (`scripts/opengrep-rules.test.cjs`, 16 rule cases in the fixtures); the three that need the engine are skipped without opengrep.
+  - **Fix to the opengrep step in this same release.** It scanned with `--baseline-commit`, which silently skips unstaged edits and untracked files (opengrep 1.11.1 and 1.32.0, exit 0). The review runs before a commit, so step 1 now scans the list of changed files instead (`git diff --name-only --diff-filter=d <base>` plus untracked files). Tests: a dirty-repo test for the new way and a KNOWN GAP test that pins the old behaviour.
 - Research: `docs/research/2026-10-25-sast-and-security-skills-landscape-evaluation.md`, eleven SAST and review repositories. Its recommendations R1 to R4 are not applied yet.
 
 ## 2026.10.25 — 2026-10-25 (schema v16)
