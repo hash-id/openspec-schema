@@ -14,6 +14,7 @@ Decide from what this change touches, not from the whole repo. A change can matc
 | LLM feature | LLM SDK calls, prompts, embeddings, retrieval | `llm-top10-2025.md` |
 | Agent with tools | tool definitions, MCP servers, skills, agent loops | `agentic-top10-2026.md` and the LLM file |
 | Machine credentials | service accounts, API keys, tokens, or bots that software uses | `nhi-top10-2025.md` |
+| Third-party packages | a package added or upgraded in a manifest (`package.json`, `requirements.txt`, `pyproject.toml`, Odoo `external_dependencies`, and so on) or its lockfile | `cicd-top10.md` |
 | Any code | always, as a language-level cross-check; the main list for a CLI, library, batch job, or native code | `cwe-top25-2025.md` |
 | Framework hints | `__manifest__.py` (Odoo 18 and later) | `odoo.md` |
 

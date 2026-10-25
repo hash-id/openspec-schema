@@ -10,7 +10,7 @@ Run the gate per capability in `specs`, per change in `design`, and on the diff 
 - Authentication, authorization, or privileges are added or changed.
 - Input comes from an untrusted source: a user, a file, a webhook, another service, or LLM output.
 - Sensitive data (credentials, tokens, personal data) is stored, exposed, or logged.
-- A secret is handled, a third-party service is integrated, or a new dependency is added.
+- A secret is handled, a third-party service is integrated, or a third-party package is added or upgraded (Odoo `external_dependencies` included; Odoo module `depends`, and a lockfile regenerated with no direct version change, are not).
 - An LLM or agent is given tools or untrusted text.
 
 **If none hold:** in `design`, write `Security pass: skipped - <reason>` under Risks / Trade-offs; in `specs` and in `apply`'s review, write nothing. Stop. Do not read anything else.

@@ -26,7 +26,8 @@ Read only these. Anything you cannot find in them, you do not write.
 - `tasks.md`, `specs/**/*.md`, `design.md` (Shape / Seams, Decisions, Risks / Trade-offs).
 - `align.md`, only the decision entries that changed behaviour.
 - The diff of the working tree.
-- Test output from this session: the RED output recorded in `apply` Phase 1 and a fresh run of the suite now.
+- Test output: the RED output `apply` Phase 1 wrote to `red-log.md` (next to `tasks.md`), and a fresh run of the suite now.
+- The floor-guard flags the user approved in `hrt-apply-code-review` (rule, file, the user's reason).
 
 ## Output
 
@@ -51,6 +52,8 @@ Use this template. Keep the three headings as written. Write the prose under the
 **Blast Radius:** <one word>
 
 <one or two sentences: who or what breaks if this is wrong>
+
+**Approved floor-guard flags:** <one line each: rule, file, reason; or "none">
 ```
 
 ### Summary
@@ -70,7 +73,7 @@ Take the structure from `design.md`'s Shape / Seams section and the real diff. N
 Show a before and after for the behaviour that matters most, not for every task. Pick the scenarios the specs treat as critical, plus any negative or `[security]` scenario.
 
 - Execution evidence only: a test name with its real failure line, then the same test passing. Use the output you have. Do not retype it from memory.
-- If the Phase 1 RED output was not recorded, write `Before: not recorded` for that item. Never reconstruct a failure.
+- If the Phase 1 RED output is not in `red-log.md`, write `Before: not recorded` for that item. Never reconstruct a failure.
 - Screenshots count as stronger evidence when the change is visual and the environment can take them. They cannot go into a text file, so name where the user should attach them. Do not fake one.
 - Include the final result of the full suite on one line (pass count, fail count).
 - Name the security scanners `apply` ran and their result in one line, or write `no scanner configured`. Never imply a scan happened that did not.
@@ -80,6 +83,8 @@ Show a before and after for the behaviour that matters most, not for every task.
 **Door.** A two-way door can be walked back with a revert. A one-way door cannot. Mark one-way when the diff contains any of: a data migration or destructive schema change, deletion of stored data, a change to a published API or event contract, a config or flag removal that other code reads, or a step that has to be undone by hand. Otherwise two-way. Check the specs' `MODIFIED` and `REMOVED` deltas, since a breaking spec change is a contract change.
 
 **Blast Radius.** One word (for example `module`, `consumers`, `data`, `tenant`, `release`), then one or two sentences on who or what breaks if the change is wrong. Draw this from `design.md` Risks / Trade-offs and the diff. If `design.md` lists a `[Threat] -> Mitigation` entry, say whether a passing test covers the mitigation. Do not contradict a failure-consequence statement already approved in the design. Say what the Blast Radius rests on (the suite result, a design Risk, or the diff alone). If it rests on the diff alone, write "not checked beyond the diff".
+
+**Approved floor-guard flags.** Each suppression, skip, deleted test, assertion drop, or stub that the user approved during the review stays in the diff. List each one on one line: the rule, the file, and the user's reason, without the line text. Write `none` if there were none. A security suppression goes first.
 
 ## Rules
 

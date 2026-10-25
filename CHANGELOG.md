@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026.10.25 — 2026-10-25 (schema v16)
+
+The `apply` review could not see an agent lowering the bar to get to green. A read-only scan of three downstream repositories found one real case: blanket `@ts-ignore` comments added to tests in apply commits, mentioned in no artifact or `mr-brief.md`. Taken from `addyosmani/agent-skills` after an evaluation of its 25 skills, an independent plan review, and that measurement (`docs/research/2026-10-25-addyosmani-agent-skills-evaluation.md`).
+
+- **Floor guard in `hrt-apply-code-review`.** A bundled, zero-dependency `floor-guard.cjs` runs in step 1 over the diff against the same base branch as the security scan, plus untracked files. It flags five moves:
+  - an added suppression comment, with `# nosec`, `nosemgrep`, and `gitleaks:allow` as a separate security rule whose line text is never printed;
+  - an added skip in a test file that existed before the change;
+  - a deleted test file (renames excluded);
+  - a drop in the assertion count across all test files;
+  - an added stub or swallowed exception in production code.
+
+  Patterns cover Python (including unittest and Odoo) and JS/TS. It is not a linter: the reviewer classifies each flag.
+  - A deleted test, a skip, or an assertion drop is LOW when it belongs to a REMOVED or MODIFIED requirement, otherwise HIGH DECISION.
+  - A security suppression is HIGH DECISION, and goes to the user even in dark mode.
+  - Any other suppression is MEDIUM DECISION. The recommended resolution is to remove it and fix what it hides. It is kept only with a reason specific to that line; a generic reason such as "errors suppressed for test files" does not count.
+  - A stub is HIGH DECISION, which the reviewer may lower for an abstract hook or an optional import.
+
+  A flag the user already answered is not asked again on a later pass. Approved flags are listed in `mr-brief.md` under Merge Danger. 19 new tests (`scripts/floor-guard.test.cjs`).
+- **Supply-chain questions.** The `hrt-security-pass` gate now fires when a third-party package is added or upgraded, not only on a new dependency. Odoo `external_dependencies` counts; module `depends` and a regenerated lockfile do not. A new reference, `cicd-top10.md`, carries OWASP CICD-SEC-3 Dependency Chain Abuse: pinning, the lockfile diff, install scripts, dependency confusion and typosquatting, one upgrade at a time, and, in `apply`, audit triage by reachability.
+- **Performance lens** in `hrt-apply-code-review` step 2, for changed code: N+1, an unbounded fetch or loop over caller-controlled input, no pagination, a hot-path allocation. Always LOW DECISION, so it warns and never blocks, and a behaviour-bearing loop is never rewritten without the user. Breaking a performance requirement stated in specs or design stays HIGH.
+- **RED output on disk.** `apply` Phase 1 writes each task's RED output to `red-log.md` next to `tasks.md`. The fresh Phase 2 reviewer and `hrt-mr-brief` read it from disk instead of from session memory.
+- **Deferred:** a mutation probe for `[security]` tests (invert the guard, run the test, restore). It is designed in the research doc, §4.2. It will be enabled when a weak security test is seen in practice.
+
 ## 2026.10.21 — 2026-10-21 (schema v15)
 
 The process was too heavy: four loops waiting for a human, 8-10 subagents before any code, and one decision restated in up to five documents. Measured on 27 real changes in three downstream repositories and written up in `docs/research/2026-10-21-tempa-spec-weight-and-phase-reduction.md` (summary: `docs/research/2026-10-21-tempa-spec-weight-summary.md`). Recommendations R1-R6 and R8 applied; R7 (a hand log) and R9 (design and specs volume) are follow-ups outside the schema.

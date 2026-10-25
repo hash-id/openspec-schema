@@ -19,12 +19,12 @@ A finding that would normally escalate to the user is routed as below. Everythin
 | `design` (`hrt-adversarial-authoring`, artifact: design) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided | Design |
 | `align` (`hrt-align-consistency-review`) | every ALIGN DECISION and HIGH finding | nothing extra — but VERIFY and WALKTHROUGH are unchanged, and WALKTHROUGH stays the mandatory closing review; the user is also shown `dark.md` | Align (tag each entry with its cycle number) |
 | `apply` Phase 1 (`tdd` loop) | a seam-mismatch blocker (the gate can weigh an alternative seam against code, design, and specs) | any other Phase 1 blocker | Apply |
-| `apply` Phase 2 (`hrt-apply-code-review`) | every finding that would otherwise surface to the user | nothing extra | Apply |
+| `apply` Phase 2 (`hrt-apply-code-review`) | every finding that would otherwise surface to the user | a new security suppression flagged by the floor guard (invariant 2) | Apply |
 
 ## Invariants across all phases
 
 1. ANCHORED findings, and findings both independent reviewers raised, auto-resolve in the calling skill and never reach this routing at all.
-2. A finding that is a security requirement or mitigation already decided by `hrt-security-pass` ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`. That decision is a hard constraint, not an opposing case to weigh.
+2. A finding that is a security requirement or mitigation already decided by `hrt-security-pass` ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`. That decision is a hard constraint, not an opposing case to weigh. The same holds for a new security suppression (`# nosec`, `nosemgrep`, `gitleaks:allow`) that `hrt-apply-code-review`'s floor guard flags: it switches off a security check, so it ALWAYS goes to the user.
 3. The `proposal` phase's "one change or several?" question (the change-size rule in the interview) ALWAYS goes to the user. The answer depends on the user's capacity and priorities, which no grounding artifact holds. The proposal has no other dark-mode routing: it has no model review, and the interview is the user's own answers.
 4. WALKTHROUGH in `align` stays mandatory and fully manual in every dark-mode variant.
 5. `hrt-dark-mode-decision-gate` is always a fresh subagent, always writes its reasoning to the matching `dark.md` section, and never escalates to the user from within itself — it always produces a decision. See that skill for the steel-manning procedure.

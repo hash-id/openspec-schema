@@ -1,5 +1,5 @@
 name: tempa-spec
-version: 15
+version: 16
 description: Spec-Driven Development that fit againsts Hash SDLC
 artifacts:
   - id: proposal
@@ -244,7 +244,7 @@ apply:
     **Seam override.** Seams are already fixed in `design.md`'s Shape / Seams section. This supersedes the seam-confirmation step of the `tdd` skill's loop: do not choose or re-derive a seam. Before each RED test, verify the seam `design.md` names still matches the actual code. A seam that is missing, wrong, or cannot carry a test is a blocker — pause to the user (following the `plain-language-writing` skill's COMMS rules), same as any other PHASE 1 blocker. MUST NOT silently substitute a different seam.
     Context files are provided - follow the Read order above (align.md and tasks.md binding, the rest for gaps).
     If a test keeps failing after a couple of straightforward attempts, or manual verification of a task shows unexpected behaviour with no obvious cause, MUST use the `diagnosing-bugs` skill instead of continuing to guess - it builds a reproducible feedback loop and ranked hypotheses before another fix attempt. Pause on any other blocker.
-    Keep each task's RED output (test name and its failure line) so PHASE 3 can quote it as evidence.
+    Write each task's RED output to `red-log.md` next to `tasks.md` as soon as you see it: one line per task, `- <task id> <test name>: <failure line>`. PHASE 2 and PHASE 3 read it from there as evidence, so it must be on disk, not only in this session. It is a working log, not an artifact: nothing lints it. When groups run in parallel, only the orchestrator writes it, from each group's report.
 
     **Scheduling groups.** Read each group's `Depends on:` line in `tasks.md` (written by the `tasks` phase). A group with no `Depends on:` depends on the group before it. Parallel apply is never the default: it happens only when `tasks.md` declares at least one group that can start before the group before it finishes, and the user confirms below. If the lines are malformed or cyclic, run groups in order exactly as above - do not infer dependencies yourself.
     Otherwise schedule with a rolling frontier: the frontier is every unfinished group whose dependencies are all done. Whenever a group finishes (and at the start), start frontier groups until the concurrency limit is reached. Do not wait for unrelated running groups to finish first. Concurrency limit: read logical cores and available memory with whatever the platform offers (for example `nproc` and `MemAvailable` in `/proc/meminfo`, or `sysctl hw.ncpu` and `vm_stat` on macOS). limit = min(floor(cores / 3), floor(available GB / 2)). If the reading fails or limit < 2, run in order. Never run more groups at once than limit.
