@@ -38,7 +38,7 @@ Then walk each matched reference file once. Add a threat only when a category ap
 
 If the change handles personal data, also walk the LINDDUN categories once: linkability, identifiability, non-repudiation, detectability, disclosure, unawareness, non-compliance. Write a LINDDUN threat in the same line format below, with the LINDDUN word as its category.
 
-Leave out: denial of service unless availability is a stated goal, threats that need unlikely preconditions, extra defence-in-depth when a primary control exists, and anything in code the change does not touch.
+Leave out: denial of service unless availability is a stated goal, threats that need an unlikely precondition outside the change (an attacker who already has admin or shell access, or a dependency that is already broken), extra defence-in-depth when a primary control exists, and anything in code the change does not touch.
 
 ## 3. Write it down
 
@@ -50,7 +50,7 @@ Leave out: denial of service unless availability is a stated goal, threats that 
 
 The id (T1, T2, ...) is unique in the file. `tasks` cites it in a group's `Covers:` line.
 
-- Severity: High = reachable by an unauthenticated or low-privilege caller, or exposes secrets, personal data, or money. Low = needs unusual preconditions or a privileged caller. Medium = the rest.
+- Severity: High = reachable by an unauthenticated or low-privilege caller, or exposes secrets, personal data, or money. Low = needs an unusual precondition or a privileged caller. Medium = the rest. A timing window that ordinary concurrent requests can hit is not an unusual precondition: rate it by what it exposes, so a race on money is High and is not left out by section 2. In `apply` the review's own severity rules decide, and this paragraph only explains the wording.
 - Source: a category id from the reference you used (for example `A01:2025`, `API1:2023`), a CWE id, or the name of an OWASP Cheat Sheet. Use only ids that appear in a reference file or that you can verify. Leave the source out rather than invent one.
 - If the project's `context:` names a standard it works to (for example an ASVS level or PCI DSS), also cite that standard's requirement ids, but only ones you can read in the project's own documents.
 - Every threat that belongs to a capability should trace to a negative scenario in that capability's spec. If there is none, specs missed it: `design` may append the scenario to that spec file now (all planning artifacts are still drafts) and say so in one line. A change-level threat that fits no capability (a new dependency, a secret in the repository) needs no scenario: name the scanner, license check, or other command that shows it is handled in the mitigation text. Either way, `tasks` lists the threat id in a group's `Covers:` line and that group carries a task tagged `[security]`; `hrt-artifact-lint` fails a threat id no group covers.
