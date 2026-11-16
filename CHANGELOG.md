@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (schema v18)
+## 2026.11.17 — 2026-11-17 (schema v18)
+
+Reviews that did not run no longer pass as clean, dark mode no longer decides steps that cannot be undone, and `apply` checks for subagents and opengrep before writing any code. From the Elephant-Goldfish Model analysis (`docs/research/2026-11-16-egm-adoption-analysis.md`) and a review of the schema on 2026-11-16. Not yet exercised on a real change: these are prompt rules with no benchmark.
 
 - **A review that did not run is never a clean pass** (from `docs/research/2026-11-16-egm-adoption-analysis.md` §3.1, §3.2, §3.5; commit `5826ffb`). In `hrt-adversarial-authoring`, `hrt-align-consistency-review` and `hrt-apply-code-review`, a reviewer subagent that fails, times out, returns nothing, or cannot read an input is retried once, then recorded as `not run`: the artifact is not finalized, `align` stops before WALKTHROUGH, and `apply` ends as a RELEASE BLOCKER if its 3rd pass is `not run`. A host with no subagents is the same case: the skill stops and reports. A recommendation to reject a finding names the file and line or section where the user can check it, or is labelled `unchecked reason:`.
 - **Dark mode never decides a one-way door.** `hrt-dark-mode-routing` gains invariant 5: a data migration or destructive schema change, deletion of stored data, a change to a published API or event contract, a config or flag removal other code reads, a step undone by hand, and a change to settled scope always go to the user, in every phase. Before, `align` and `apply` Phase 2 routed every such finding to `hrt-dark-mode-decision-gate`, so a subagent could approve a destructive migration that the user saw only in the closing `dark.md` review. `hrt-dark-mode-decision-gate` refuses these findings, and the `hrt-dark-mode-opt-in` warning now says the agent still stops for security decisions and steps that cannot be undone easily.
