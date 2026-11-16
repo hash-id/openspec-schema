@@ -1,6 +1,6 @@
 ---
 name: hrt-artifact-lint
-description: "Runs the deterministic structural lint over a tempa-spec change's artifacts (hashtag counts, checkbox format, delta headers, capability<->spec-file correspondence, Covers: target existence, design.md section presence, unverified External Dependencies rows, tasks.md group graph: Depends on, task coverage: Covers: per group in both directions, the threat chain: every threat answered by a negative scenario or a named check, and proposal size and shape warnings) so a language model does not do this by hand. Called from hrt-adversarial-authoring and hrt-align-consistency-review. Judgement checks stay with the reviewers."
+description: "Runs the deterministic structural lint over a tempa-spec change's artifacts (hashtag counts, checkbox format, delta headers, capability<->spec-file correspondence, Covers: target existence, design.md section presence, unverified External Dependencies rows, tasks.md group graph: Depends on, task coverage: Covers: per group in both directions, the threat chain: every design threat id named by a group's Covers: line, and that group carrying a [security] task, and proposal size and shape warnings) so a language model does not do this by hand. Called from hrt-adversarial-authoring and hrt-align-consistency-review. Judgement checks stay with the reviewers."
 ---
 
 # hrt-artifact-lint

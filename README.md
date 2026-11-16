@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  <img alt="Schema version" src="https://img.shields.io/badge/schema-v15-blue.svg">
+  <img alt="Schema version" src="https://img.shields.io/badge/schema-v18-blue.svg">
   <img alt="Requires" src="https://img.shields.io/badge/requires-OpenSpec_%2B_git_%2B_Node.js-lightgrey.svg">
 </p>
 
@@ -19,7 +19,7 @@
 The default OpenSpec pipeline (`proposal -> specs -> design -> tasks -> apply`) takes the agent's self-report at face value: it produces an artifact, checks a box, moves on. `tempa-spec` doesn't. It adds a capped interview before anything gets proposed, a human-gated consistency pass before implementation starts, and a strict TDD-plus-review discipline before a task counts as done — three places where the default schema just trusts and `tempa-spec` makes the agent show its work.
 
 ```
-proposal -> { specs, design } -> tasks -> align -> apply (TDD + review)
+proposal -> specs -> design -> tasks -> align -> apply (TDD + review)
 ```
 
 ---

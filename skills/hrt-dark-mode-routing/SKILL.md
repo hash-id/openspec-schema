@@ -15,11 +15,11 @@ A finding that would normally escalate to the user is routed as below. Everythin
 
 | Phase | Routes to `hrt-dark-mode-decision-gate` | Still goes to the user | `dark.md` section |
 | --- | --- | --- | --- |
-| `specs` (`hrt-adversarial-authoring`, artifact: specs) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided | Specs |
-| `design` (`hrt-adversarial-authoring`, artifact: design) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided | Design |
-| `align` (`hrt-align-consistency-review`) | every ALIGN DECISION and HIGH finding | nothing extra — but VERIFY and WALKTHROUGH are unchanged, and WALKTHROUGH stays the mandatory closing review; the user is also shown `dark.md` | Align (tag each entry with its cycle number) |
+| `specs` (`hrt-adversarial-authoring`, artifact: specs) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided; a one-way door or a change to settled scope (invariant 5) | Specs |
+| `design` (`hrt-adversarial-authoring`, artifact: design) | a single-reviewer UNANCHORED finding | everything `hrt-security-pass` decided; a one-way door or a change to settled scope (invariant 5) | Design |
+| `align` (`hrt-align-consistency-review`) | every ALIGN DECISION and HIGH finding, except invariant 5 | a one-way door or a change to settled scope (invariant 5) — and VERIFY and WALKTHROUGH are unchanged, and WALKTHROUGH stays the mandatory closing review; the user is also shown `dark.md` | Align (tag each entry with its cycle number) |
 | `apply` Phase 1 (`tdd` loop) | a seam-mismatch blocker (the gate can weigh an alternative seam against code, design, and specs) | any other Phase 1 blocker | Apply |
-| `apply` Phase 2 (`hrt-apply-code-review`) | every finding that would otherwise surface to the user | a new security suppression flagged by the floor guard (invariant 2) | Apply |
+| `apply` Phase 2 (`hrt-apply-code-review`) | every finding that would otherwise surface to the user, except invariants 2 and 5 | a new security suppression flagged by the floor guard (invariant 2); a one-way door or a change to settled scope (invariant 5) | Apply |
 
 ## Invariants across all phases
 
@@ -27,7 +27,8 @@ A finding that would normally escalate to the user is routed as below. Everythin
 2. A finding that is a security requirement or mitigation already decided by `hrt-security-pass` ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`. That decision is a hard constraint, not an opposing case to weigh. The same holds for a new security suppression (`# nosec`, `nosemgrep`, `gitleaks:allow`) that `hrt-apply-code-review`'s floor guard flags: it switches off a security check, so it ALWAYS goes to the user.
 3. The `proposal` phase's "one change or several?" question (the change-size rule in the interview) ALWAYS goes to the user. The answer depends on the user's capacity and priorities, which no grounding artifact holds. The proposal has no other dark-mode routing: it has no model review, and the interview is the user's own answers.
 4. WALKTHROUGH in `align` stays mandatory and fully manual in every dark-mode variant.
-5. `hrt-dark-mode-decision-gate` is always a fresh subagent, always writes its reasoning to the matching `dark.md` section, and never escalates to the user from within itself — it always produces a decision. See that skill for the steel-manning procedure.
+5. A finding that is a one-way door ALWAYS goes to the user, never to `hrt-dark-mode-decision-gate`: a data migration or destructive schema change, deletion of stored data, a change to a published API or event contract, a config or flag removal other code reads, or a step that has to be undone by hand (the same list the review skills use for "needs its own answer"). So does a finding that changes scope `proposal.md` (or, in `apply`, the specs) already settled. A wrong call here cannot be fixed by reading `dark.md` afterwards. The calling skill shows these to the user in its usual "needs its own answer" message and waits; everything else keeps routing as in the table.
+6. `hrt-dark-mode-decision-gate` is always a fresh subagent, always writes its reasoning to the matching `dark.md` section, and never escalates to the user from within itself — it always produces a decision. See that skill for the steel-manning procedure.
 
 ## Planning-only vs +implementation
 

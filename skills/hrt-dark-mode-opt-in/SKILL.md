@@ -27,6 +27,7 @@ MUST NOT offer, suggest, or mention dark mode - at any phase, in any form. This 
 > The agent will make big decisions by itself. Normally, the agent stops and asks you before a big decision.
 >
 > In dark mode, it does not stop. It decides alone, and it can decide wrong.
+> It still stops and asks you about security decisions, and about steps that cannot be undone easily (for example a data migration, deleting data, or changing a published API).
 > A wrong decision can damage your codebase. In the worst case, your work could be lost.
 >
 > If something goes wrong, YOU ARE RESPONSIBLE for the result.

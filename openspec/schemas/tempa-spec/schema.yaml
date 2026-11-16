@@ -1,6 +1,6 @@
 name: tempa-spec
-version: 17
-description: Spec-Driven Development that fit againsts Hash SDLC
+version: 18
+description: Spec-Driven Development that fits the Hash SDLC
 artifacts:
   - id: proposal
     generates: proposal.md
@@ -10,6 +10,7 @@ artifacts:
       Create the proposal document that establishes WHY this change is needed. It is the single home for the change's intent: no separate discovery file exists. This phase opens with a short interview, then drafts.
 
       INTERVIEW (before drafting):
+      Before the first question: if this host cannot spawn a subagent, tell the user once that `specs`, `design`, `align` and `apply` review in subagents and will stop on this host, and ask whether to continue with the proposal anyway.
       MUST use the `grilling` skill. If a question can be answered by exploring the codebase or existing specs in `openspec/specs/`, explore it yourself instead of asking.
       Override of grilling's "until the frontier is empty": at most 4 questions per round and at most 4 rounds (16 in total). Whatever is still open after the last round is written under Assumptions & Open Questions, not asked again.
 
@@ -227,6 +228,8 @@ apply:
     Read order: align.md and tasks.md are binding. align.md is the human-reviewed decision log for proposal through align, and each entry points to its source document and section. Read proposal.md, specs/**/*.md, and design.md only to fill a gap those two do not cover, following the pointers to the exact passage. align.md wins any conflict.
 
     MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
+
+    PREFLIGHT (every mode, before anything else, writes nothing): check now what PHASE 2 will need, so a missing tool stops the change before any code is written instead of after. (1) If this host cannot spawn a subagent, STOP: PHASE 2's review runs only in subagents (`hrt-apply-code-review`), so the change could never pass review here. (2) Run `opengrep --version`. If it fails and the change will touch a `.py`, `.js`, `.jsx`, `.ts` or `.tsx` file, or an `.xml` file in a repo with a `__manifest__.py` (judge from `design.md`'s Shape / Seams and `tasks.md`; when unsure, assume it will), STOP and tell the user to install opengrep (the README has the commands). Do not install it, look for another copy, or offer to continue without it - the PHASE 2 rule is unchanged, this only moves the check earlier. Both stop messages MUST follow the `plain-language-writing` skill's COMMS rules.
 
     FIRST, check `dark.md`:
     - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1 to completion across all pending tasks - do NOT spawn a new subagent per task (that one subagent is the PHASE 1 orchestrator, and spawns group subagents itself only when PHASE 1 schedules parallel groups below; if it cannot spawn subagents, it runs every group in order). Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 3, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
