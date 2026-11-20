@@ -90,6 +90,7 @@ None.
 
 const GOOD_TASKS = `## 1. Export CSV for a single table
 
+Depends on: none
 Covers: Successful export
 
 - [ ] 1.1 Create export module
@@ -97,6 +98,7 @@ Covers: Successful export
 
 ## 2. Export with filters
 
+Depends on: 1
 Covers: none
 
 - [ ] 2.1 Parse filters
@@ -282,7 +284,7 @@ test("archive task in tasks.md is an ERROR", () => {
 test("non-checkbox bullet under a task heading is a WARN", () => {
   const r = run(
     goodChange({
-      "tasks.md": GOOD_TASKS + "\n## 3. More\n\nCovers: none\n\n- do a thing without a checkbox\n",
+      "tasks.md": GOOD_TASKS + "\n## 3. More\n\nDepends on: 2\nCovers: none\n\n- do a thing without a checkbox\n",
     })
   );
   assert.strictEqual(r.code, 0, r.out);
@@ -347,6 +349,19 @@ test("malformed Depends on value is an ERROR", () => {
   const r = run(tasksChange(PAR_TASKS.replace("Depends on: 1, 2", "Depends on: the others")));
   assert.strictEqual(r.code, 1);
   assert.match(r.out, /"Depends on:" must be "none" or a comma-separated list of group numbers/);
+});
+
+test("a group with no Depends on line is an ERROR", () => {
+  const r = run(tasksChange(PAR_TASKS.replace("Depends on: none\nCovers: none", "Covers: none")));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 has no "Depends on:" line/);
+  assert.doesNotMatch(r.out, /group 1 has no "Depends on:"/);
+});
+
+test("a tasks.md with no Depends on line at all reports every group", () => {
+  const r = run(tasksChange(PAR_TASKS.replace(/Depends on: .*\n/g, "")));
+  assert.strictEqual(r.code, 1);
+  for (const g of [1, 2, 3]) assert.match(r.out, new RegExp(`group ${g} has no "Depends on:" line`));
 });
 
 test("metadata-looking line after the first checkbox is prose, not graph metadata", () => {

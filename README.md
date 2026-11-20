@@ -6,7 +6,7 @@
 
 <p align="center">
   <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  <img alt="Schema version" src="https://img.shields.io/badge/schema-v18-blue.svg">
+  <img alt="Schema version" src="https://img.shields.io/badge/schema-v19-blue.svg">
   <img alt="Requires" src="https://img.shields.io/badge/requires-OpenSpec_%2B_git_%2B_Node.js-lightgrey.svg">
 </p>
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased (schema v19)
+
+`apply` follows mattpocock's `implement` (one context, scoped tests) rather than `implement-spec` (parallel worktrees), the task-group graph is required, and `apply` keeps a log for retrospectives. From a comparison with mattpocock's `to-tickets`, `implement` and `implement-spec` and a count of 257 `tasks.md` files in 20 downstream repositories (`docs/research/2026-11-20-apply-parallelism-and-mattpocock-implement.md`). Not yet exercised on a real change.
+
+- **Test scope in every mode.** Per task, `apply` runs only the tests that task wrote or changed plus the repo's fast static checks, and the full suite once after the last group. Before, this rule was written only for parallel group subagents, so in the usual in-order run nothing stopped an agent from running the full suite per task (one Odoo repository had to forbid it in its own `rules:` because its suite takes hours).
+- **`Depends on:` is required on every task group.** `hrt-artifact-lint` fails a group without the line; `align`'s `tasks graph` dimension always runs and reports an edge with no real need as LOW. A `tasks.md` written before v19 still applies: a group with no line depends on the one before it.
+- **`apply-log.md`.** Per group: mode, start and finish times from the system clock, duration, problems and resolutions; then the full suite, PHASE 2 and PHASE 3 times. Material for a retrospective, and the data for deciding where `apply` is slow. Nothing lints it.
+- **Not adopted:** worktrees per group (`implement-spec`). Each worktree needs its own test environment (for Odoo, one container and one database copy each), more than a typical laptop carries.
+
 ## 2026.11.17 — 2026-11-17 (schema v18)
 
 Reviews that did not run no longer pass as clean, dark mode no longer decides steps that cannot be undone, and `apply` checks for subagents and opengrep before writing any code. From the Elephant-Goldfish Model analysis (`docs/research/2026-11-16-egm-adoption-analysis.md`) and a review of the schema on 2026-11-16. Not yet exercised on a real change: these are prompt rules with no benchmark.

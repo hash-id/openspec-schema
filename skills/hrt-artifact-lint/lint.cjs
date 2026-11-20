@@ -4,7 +4,7 @@
 // cheap one - does slowly and unreliably: hashtag counts, checkbox format,
 // delta-operation headers, capability <-> spec-file correspondence,
 // Covers: target existence, design.md section presence, unverified
-// External Dependencies rows, tasks.md group graph (Depends on), task
+// External Dependencies rows, tasks.md group graph (Depends on, required per group), task
 // coverage (Covers: per group, both directions, scenario names and threat ids),
 // proposal size and shape (WARN only).
 //
@@ -529,8 +529,9 @@ function stripComments(text) {
   return text.replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ""));
 }
 
-// Group graph: "Depends on:" lines under a "## N." heading.
-// A group with no "Depends on:" depends on the previous group (apply runs in order).
+// Group graph: "Depends on:" lines under a "## N." heading. Required on every
+// group (schema v19+). For the cycle check a missing line falls back to the
+// previous group, which is also how apply reads a tasks.md written before v19.
 function lintTaskGraph(file, text) {
   const ls = lines(stripComments(text));
   const groups = [];
@@ -553,6 +554,7 @@ function lintTaskGraph(file, text) {
     if (!cur.open) continue;
     const m = ls[i].match(/^(Depends on):\s*(.*?)\s*$/i);
     if (!m) continue;
+    cur.hasLine = true;
     if (/^none$/i.test(m[2])) {
       cur.deps = [];
     } else if (/^\d+(\s*,\s*\d+)*$/.test(m[2])) {
@@ -560,6 +562,10 @@ function lintTaskGraph(file, text) {
     } else {
       err(file, n, '"Depends on:" must be "none" or a comma-separated list of group numbers');
     }
+  }
+  for (const g of groups) {
+    if (!g.hasLine)
+      err(file, g.line, `group ${g.id} has no "Depends on:" line - write "none", or the numbers of the groups it needs finished first`);
   }
   if (!groups.some((g) => g.deps)) return;
 
