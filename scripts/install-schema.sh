@@ -96,6 +96,6 @@ node "$TMP/merge-config.cjs" "$CONFIG" "$SCHEMA_NAME" "$CONTEXT_MARKER" "$CONTEX
 }
 
 echo "Installed '${SCHEMA_NAME}' -> ${DEST}"
-echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, hrt-security-pass, plain-language-writing, hrt-mr-brief, hrt-dark-mode-opt-in, hrt-dark-mode-decision-gate, hrt-dark-mode-routing)"
+echo "Installed skills -> .agents/skills/ (grilling, tdd, diagnosing-bugs, research, hrt-align-consistency-review, hrt-apply-code-review, hrt-adversarial-authoring, hrt-artifact-lint, hrt-security-pass, plain-language-writing, hrt-mr-brief)"
 echo "Set default schema -> ${SCHEMA_NAME} (${CONFIG})"
 echo "Use it:  openspec new change <name>"

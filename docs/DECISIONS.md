@@ -50,7 +50,7 @@ Reference-file format constraints (a maintenance contract, see AGENTS.md): offic
 
 ## 8. opengrep: required, no waiver
 
-- Why required: on `sip` the scan found **about twenty SQL interpolations that the Semgrep registry packs did not** (`research/2026-10-25-sast-and-security-skills-landscape-evaluation.md` §4.2). It is protection with demonstrated unique yield, and a waivable check is a check that stops running — the same failure mode `floor-guard.cjs` exists to catch. The binary is a one-time-per-machine install, caught at `apply` PREFLIGHT before any code is written; dark mode does not route the rule to a decision gate because an autonomous agent would always waive.
+- Why required: on `sip` the scan found **about twenty SQL interpolations that the Semgrep registry packs did not** (`research/2026-10-25-sast-and-security-skills-landscape-evaluation.md` §4.2). It is protection with demonstrated unique yield, and a waivable check is a check that stops running — the same failure mode `floor-guard.cjs` exists to catch. The binary is a one-time-per-machine install, caught at `apply` PREFLIGHT before any code is written.
 - Why results stay "candidates" rather than automatic HIGH: the rules have not been measured on enough real code. A candidate is kept only if the changed code is exploitable and dismissed only with a one-line reason. (2026-11 external review suggested recording candidate counts per run to build that measurement; rejected: waivers; accepted and implemented: each pass's review report carries the tally — candidates raised, kept, dismissed — and the orchestrator records it in `retro-log.md`.)
 - The `--baseline-commit` flag is banned: on opengrep 1.11.1 and 1.32.0 it **silently skips unstaged edits and untracked files**, and the review runs before anything is committed — so the scan runs on tracked files that differ from the base branch plus untracked ones. Pinned as a KNOWN GAP test so a fixed opengrep makes it fail and prompts a second look.
 - The rules are local files (`hrt-security-pass/opengrep/`), so no registry is contacted; fixtures in `scripts/fixtures/opengrep-rules/`; `scripts/opengrep-rules.test.cjs` requires a positive and a negative case per rule; its engine tests skip when opengrep is not installed, so run `npm test` with opengrep on the machine before releasing a rule change. Rule tests passed on opengrep 1.11.1 and 1.32.0.
@@ -65,9 +65,19 @@ Adapted from `addyosmani/agent-skills`' floor guard (MIT, credited in the script
 
 The change's working records were consolidated into one `retro-log.md` (2026-11-20 maintainer decision: one log file per change, no separate schema-level logs): Phase 1 - TDD (RED output lines + one subsection per group with mode, times, problems, resolutions), Phase 2 - Review (passes, times, the opengrep tally), Phase 3 - MR brief (times). This replaced `red-log.md` and `apply-log.md`, whose content it holds. `mr-brief.md` stays a separate file on purpose — it is an output artifact for a human reviewer (rewritten once, committed and pasted as a review comment), not a log, so it does not merge into the append-as-you-go file. Schema version stayed 19 (no bump for a working-file rename; the next CHANGELOG release entry records it). Research docs that name the old files are history and are not rewritten.
 
-## 11. Dark mode routing
+## 11. Dark mode (removed)
 
-`hrt-dark-mode-routing` is the single source of truth for where a dark-mode finding goes; each phase points at it in one line. This replaced per-phase dark-mode carve-out paragraphs that used to be inlined. Background: `research/2026-08-17-dark-factory-autonomous-approval-mode.md` (plus `hrt-dark-mode-opt-in` and `hrt-dark-mode-decision-gate`).
+Removal decided 2026-11-20, executed 2026-11-21. The three `hrt-dark-mode-*` skills (`hrt-dark-mode-opt-in`, `hrt-dark-mode-decision-gate`, `hrt-dark-mode-routing`), the `templates/dark.md` artifact, and every routing pointer are gone. The schema version stayed 19.
+
+- **Usage evidence: 0 of 55.** Across 55 archived changes in three downstream repositories — bizkit-mobile (33), bizkit-desktop-tauri (17), bizkit-desktop (5) — no change used or mentioned dark mode.
+- **Why usage was structurally zero.** The anti-offer rule ("MUST NOT offer, suggest, or mention dark mode proactively") made any use depend on the maintainer asking for it unprompted, in his own words. He never asked.
+- **Reason for removal:** prompt weight with no incident. Every dark-mode paragraph, pointer line, and clause was weight carried by every run, against a feature that never ran.
+- **The routing skill was a dispatcher, not a rule source.** Everything it routed — security decisions and suppressions, one-way doors, settled-scope changes, the change-size question, the mandatory WALKTHROUGH — already lived in the review skills and still goes to the user.
+- **What was lost:** the decision-gate steel-manning procedure, which never ran on a real change, and the +implementation behaviours: `apply` PHASE 1 as one orchestrator subagent for all tasks, `dark.md` presented in full as a second closing review before the user commits, and planning-only `apply` stopping at the door. PREFLIGHT also lost its "(every mode" qualifier — it marked that preflight ran even in the dark branches below it.
+- **Rules that named dark mode survive, reworded and unconditional:** the git-commit ban, the change-size question, the parallel-run question, and the opengrep no-waiver rule.
+- **Git history is the dormant copy.** The last commit carrying dark mode is `1357c90bb7bd529e34e379c09c8fe0c8bca6b40b`; rebuild from it rather than from scratch if dark mode ever comes back.
+- **Background:** `research/2026-08-17-dark-factory-autonomous-approval-mode.md` (history, not rewritten), and the older "Dark mode never decides ..." CHANGELOG entries stay as written.
+- **Re-addition bar:** two or more changes within one release cycle that visibly need unattended runs, evidenced in retro-logs or archives. Then rebuild from git history, not fresh.
 
 ## 12. Installer: steps and history
 

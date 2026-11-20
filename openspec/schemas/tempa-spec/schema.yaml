@@ -16,12 +16,10 @@ artifacts:
 
       If shared understanding depends on a fact about something outside this codebase - a third-party API's actual capabilities, a library's documented limits, a standard's spec - and that fact isn't already known with confidence, MUST use the `research` skill to verify it against primary sources before asking the user or writing it into the proposal as settled. Skip this for facts fully answerable from the codebase itself.
 
-      Change-size rule: if the interview shows two or more slices that are independently shippable, share no code or data dependency, and fall under different capabilities, MUST ask once "one change or several?", naming the slices and why they look independent. This is an ordinary interview question and counts toward the 16. Default is one change; MUST NOT split without the user's answer; silence is not an answer. Ask it even in dark mode. If the user splits, write the proposal for the slice they pick and list each excluded slice under Out of Scope with one line on why it was deferred. Do not apply a size threshold of your own: a large change whose parts depend on each other is one change.
+      Change-size rule: if the interview shows two or more slices that are independently shippable, share no code or data dependency, and fall under different capabilities, MUST ask once "one change or several?", naming the slices and why they look independent. This is an ordinary interview question and counts toward the 16. Default is one change; MUST NOT split without the user's answer; silence is not an answer. If the user splits, write the proposal for the slice they pick and list each excluded slice under Out of Scope with one line on why it was deferred. Do not apply a size threshold of your own: a large change whose parts depend on each other is one change.
 
       The interview has converged only when every scope decision has a reason, every desired outcome and assumption is written down, every open question is answered or recorded as still open, AND the user has confirmed shared understanding in their own words. Do not infer confirmation from silence or from a single answer.
       Any recap or confirmation prompt this schema adds beyond grilling's own questions MUST follow the `plain-language-writing` skill's COMMS rules.
-
-      Dark mode: MUST NOT offer, suggest, or mention dark mode proactively, at any point. Only if the user asks for it unprompted, in their own words, MUST use `hrt-dark-mode-opt-in` before continuing.
 
       DRAFT: once the interview has converged, write proposal.md from the template.
 
@@ -103,8 +101,6 @@ artifacts:
       Security requirements (per capability, not per change - a change can add one capability that touches a trust boundary and one that doesn't): MUST use the `hrt-security-pass` skill for each capability: it starts with a gate. If the capability touches a trust boundary, MUST follow the skill's method for `specs` and write the result as normal `### Requirement` blocks with negative `#### Scenario`s - no second requirement format. If it doesn't, MUST NOT run the rest of the skill for that capability.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: specs) to draft and adversarially review them before finalizing, once all spec files for this change are drafted - `align`'s checks later verify structure and downstream coverage, not whether a requirement is genuinely the right thing to build.
-
-      If `dark.md` exists, route findings per the `hrt-dark-mode-routing` skill.
     requires:
       - proposal
 
@@ -132,8 +128,6 @@ artifacts:
       Security pass (feeds Risks / Trade-offs): MUST use the `hrt-security-pass` skill for the change: it starts with a gate. If the change touches a trust boundary, MUST follow the skill's method for `design` and write each threat as a `[Threat T<n>: <category>, <severity>] → Mitigation` line in Risks / Trade-offs, with a unique id (T1, T2, ...) that `tasks` will cite. If it doesn't, MUST write the skill's one-line `Security pass: skipped - <reason>` and fill Risks / Trade-offs from ordinary (non-security) risk if relevant.
 
       MUST use the `hrt-adversarial-authoring` skill (artifact: design) to draft and adversarially review it before finalizing - unlike `proposal`/`specs`, this reviews whether the Decisions and Risks/Trade-offs themselves are sound, not whether design.md traces back to the proposal. Fold in any security pass above as part of the Risks / Trade-offs content the draft subagent produces.
-
-      If `dark.md` exists, route findings per the `hrt-dark-mode-routing` skill.
     requires:
       - proposal
       - specs
@@ -215,8 +209,6 @@ artifacts:
       MUST use the `hrt-align-consistency-review` skill to verify that every artifact is mutually consistent and faithful to the requirements BEFORE any code is written, and to write the findings into align.md.
 
       When `design.md`'s Shape / Seams section lists real seams (not the "no new code surface" note), the WALKTHROUGH digest MUST also point the user at it by name: the seams are the test boundaries the implementation will be built against, and a wrong one is easy to skim past because it reads as a signature, not a behavior. Ask the user to read that section specifically.
-
-      If `dark.md` exists, route findings per the `hrt-dark-mode-routing` skill.
     requires:
       - tasks
 
@@ -229,14 +221,9 @@ apply:
 
     Read order: align.md and tasks.md are binding. align.md is the human-reviewed decision log for proposal through align, and each entry points to its source document and section. Read proposal.md, specs/**/*.md, and design.md only to fill a gap those two do not cover, following the pointers to the exact passage. align.md wins any conflict.
 
-    MUST NOT run `git commit` or `git push` - in dark mode or any other mode, the user commits and pushes themselves.
+    MUST NOT run `git commit` or `git push` - the user commits and pushes themselves.
 
-    PREFLIGHT (every mode, before anything else, writes nothing): check now what PHASE 2 will need, so a missing tool stops the change before any code is written instead of after. (1) If this host cannot spawn a subagent, STOP: PHASE 2's review runs only in subagents (`hrt-apply-code-review`), so the change could never pass review here. (2) Run `opengrep --version`. If it fails and the change will touch a `.py`, `.js`, `.jsx`, `.ts` or `.tsx` file, or an `.xml` file in a repo with a `__manifest__.py` (judge from `design.md`'s Shape / Seams and `tasks.md`; when unsure, assume it will), STOP and tell the user to install opengrep (the README has the commands). Do not install it, look for another copy, or offer to continue without it - the PHASE 2 rule is unchanged, this only moves the check earlier. Both stop messages MUST follow the `plain-language-writing` skill's COMMS rules.
-
-    FIRST, check `dark.md`:
-    - Exists, header = +implementation -> SKIP PHASE 0, go directly to PHASE 1. Spawn exactly ONE fresh subagent that runs PHASE 1 to completion across all pending tasks - do NOT spawn a new subagent per task (that one subagent is the PHASE 1 orchestrator, and spawns group subagents itself only when PHASE 1 schedules parallel groups below; if it cannot spawn subagents, it runs every group in order). Give it the same context files PHASE 1 reads below. Route PHASE 1 and PHASE 2 findings per the `hrt-dark-mode-routing` skill. After PHASE 3, present `dark.md` in full alongside the code diff as a second closing review before the user commits.
-    - Exists, header = planning-only -> STOP. Do not run apply in this session. Tell the user planning-only dark mode ends at WALKTHROUGH; apply happens elsewhere.
-    - Does not exist -> proceed to PHASE 0 below, unchanged.
+    PREFLIGHT (before anything else, writes nothing): check now what PHASE 2 will need, so a missing tool stops the change before any code is written instead of after. (1) If this host cannot spawn a subagent, STOP: PHASE 2's review runs only in subagents (`hrt-apply-code-review`), so the change could never pass review here. (2) Run `opengrep --version`. If it fails and the change will touch a `.py`, `.js`, `.jsx`, `.ts` or `.tsx` file, or an `.xml` file in a repo with a `__manifest__.py` (judge from `design.md`'s Shape / Seams and `tasks.md`; when unsure, assume it will), STOP and tell the user to install opengrep (the README has the commands). Do not install it, look for another copy, or offer to continue without it - the PHASE 2 rule is unchanged, this only moves the check earlier. Both stop messages MUST follow the `plain-language-writing` skill's COMMS rules.
 
     PHASE 0 - SESSION CHECK: if you recall un-recorded planning back-and-forth, still hold raw/superseded draft content, or wrote align.md yourself this conversation - STOP, tell user to start a new session with only align.md + tasks.md. Best-effort only (no way to know which session this is); an actual new session is the real enforcement.
     This stop message and any blocker/pause message in PHASE 1 below MUST follow the `plain-language-writing` skill's COMMS rules.
@@ -271,7 +258,7 @@ apply:
 
     **Scheduling groups.** Read each group's `Depends on:` line in `tasks.md` (written by the `tasks` phase). A group with no `Depends on:` line (a `tasks.md` written before schema v19) depends on the group before it. Parallel apply is never the default: it happens only when `tasks.md` declares at least one group that can start before the group before it finishes, and the user confirms below. If the lines are malformed or cyclic, run groups in order exactly as above - do not infer dependencies yourself.
     Otherwise schedule with a rolling frontier: the frontier is every unfinished group whose dependencies are all done. Whenever a group finishes (and at the start), start frontier groups until the concurrency limit is reached. Do not wait for unrelated running groups to finish first. Concurrency limit: read logical cores and available memory with whatever the platform offers (for example `nproc` and `MemAvailable` in `/proc/meminfo`, or `sysctl hw.ncpu` and `vm_stat` on macOS). limit = min(floor(cores / 3), floor(available GB / 2)). If the reading fails or limit < 2, run in order. Never run more groups at once than limit.
-    Before the first parallel start, show the user the group graph as ASCII art: groups side by side can overlap, an arrow means "waits for" (for example `[1] [2]  ->  [3]`). Then say these groups can run concurrently with a limit of N, give the two numbers behind N, and ask whether to run concurrently or in order. Do not list the groups in prose, the graph is the list. Wait for the answer. A number from the user means concurrent at that number. Run in order unless the user chooses concurrent. This question MUST follow the `plain-language-writing` skill's COMMS rules. In dark mode (+implementation) do not ask: run in order.
+    Before the first parallel start, show the user the group graph as ASCII art: groups side by side can overlap, an arrow means "waits for" (for example `[1] [2]  ->  [3]`). Then say these groups can run concurrently with a limit of N, give the two numbers behind N, and ask whether to run concurrently or in order. Do not list the groups in prose, the graph is the list. Wait for the answer. A number from the user means concurrent at that number. Run in order unless the user chooses concurrent. This question MUST follow the `plain-language-writing` skill's COMMS rules.
     Each group subagent: runs this PHASE 1 loop for its own tasks only; follows the test scope above for its own tasks, never the whole suite; does not tick checkboxes and does not commit. It reports back its RED output (test name and failure line), the files it changed, its test result, and each problem it hit with its resolution (for the retro log).
     Declared dependencies are the only isolation, so check them while running. If two groups that ran at the same time report changing the same file, or a group's test fails in code it did not change (another group's unfinished work, or a build over the whole tree), the graph in `tasks.md` is missing an edge. Start nothing new, let running groups finish, re-run the affected group alone at a quiet point, and tell the user which two groups need an edge in their `Depends on:` lines.
     The orchestrator ticks the checkboxes for finished tasks. It runs the full test suite only at a quiet point, when no group is running: before starting a group that must run alone, and after the last group. With one shared working tree, a suite run beside running groups would see their half-finished code. If the full suite fails, use the `diagnosing-bugs` skill before starting anything else. A failed group does not stop groups already running, but groups depending on it do not start.
