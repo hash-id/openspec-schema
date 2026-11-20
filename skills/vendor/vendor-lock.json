@@ -6,11 +6,11 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "sourceCommit": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
       "sourcePath": "skills/productivity/grilling",
       "license": "MIT",
       "files": {
-        "SKILL.md": "befdff1e27a1dfe2a294d5871169ac1afe16d983911daa4f32627514a48c1e15",
+        "SKILL.md": "a146842ed93ca43d833550fa9adf02e58cb63c83fea9d4b4522995b82242d4e2",
         "agents/openai.yaml": "1411d7df7d99b7e621a1ff8283c8133cc2464be63d064e52d8ce169c6800ee9b"
       }
     },
@@ -18,7 +18,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "sourceCommit": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
       "sourcePath": "skills/engineering/tdd",
       "license": "MIT",
       "files": {
@@ -32,7 +32,7 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "sourceCommit": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
       "sourcePath": "skills/engineering/diagnosing-bugs",
       "license": "MIT",
       "files": {
@@ -45,11 +45,11 @@
       "source": "mattpocock/skills",
       "sourceType": "github",
       "sourceRef": "main",
-      "sourceCommit": "49dd158d1076134a641b33efb035946536778336",
+      "sourceCommit": "abeeaf95660ba9e8b7c753eb38f441ca707a8823",
       "sourcePath": "skills/engineering/research",
       "license": "MIT",
       "files": {
-        "SKILL.md": "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4",
+        "SKILL.md": "1f629e18ab899412683bc6a1c4efb4339999e27c2fdac328f26ee10a8c031d33",
         "agents/openai.yaml": "9b4c470d63221c1f68f22df70b83e2f12401b317babe0d1b7b5f24a974474d0d"
       }
     }
