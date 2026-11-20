@@ -26,7 +26,7 @@ Read only these. Anything you cannot find in them, you do not write.
 - `tasks.md`, `specs/**/*.md`, `design.md` (Shape / Seams, Decisions, Risks / Trade-offs).
 - `align.md`, only the decision entries that changed behaviour.
 - The diff of the working tree.
-- Test output: the RED output `apply` Phase 1 wrote to `red-log.md` (next to `tasks.md`), and a fresh run of the suite now.
+- Test output: the RED output `apply` Phase 1 wrote to `retro-log.md`'s `## Phase 1 - TDD` section (next to `tasks.md`), and a fresh run of the suite now.
 - The floor-guard flags the user approved in `hrt-apply-code-review` (rule, file, the user's reason).
 
 ## Output
@@ -73,7 +73,7 @@ Take the structure from `design.md`'s Shape / Seams section and the real diff. N
 Show a before and after for the behaviour that matters most, not for every task. Pick the scenarios the specs treat as critical, plus any negative or `[security]` scenario.
 
 - Execution evidence only: a test name with its real failure line, then the same test passing. Use the output you have. Do not retype it from memory.
-- If the Phase 1 RED output is not in `red-log.md`, write `Before: not recorded` for that item. Never reconstruct a failure.
+- If the Phase 1 RED output is not in `retro-log.md`, write `Before: not recorded` for that item. Never reconstruct a failure.
 - Screenshots count as stronger evidence when the change is visual and the environment can take them. They cannot go into a text file, so name where the user should attach them. Do not fake one.
 - Include the final result of the full suite on one line (pass count, fail count).
 - Name the security scanners `apply` ran and their result in one line, or write `no scanner configured`. Never imply a scan happened that did not. If opengrep ran, give how many candidates it raised and how many were kept, and say that the bundled rules cover only Python, JavaScript/TypeScript, and Odoo. If the diff touched none of those files, write `opengrep not needed: no covered file changed`. A required scan that did not run never reaches this brief, because it blocks Phase 2.
