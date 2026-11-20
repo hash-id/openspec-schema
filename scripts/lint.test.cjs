@@ -563,6 +563,27 @@ test("a Covers name that matches no scenario is an ERROR", () => {
   assert.match(r.out, /group 2 "Covers: Imaginary scenario" names no scenario/);
 });
 
+test("FIXED: a renamed scenario gets a closest-match hint on both Covers errors", () => {
+  // The MiniMax-review rename story: the scenario is renamed in specs, tasks.md
+  // and design.md still name the old one. Matching stays exact; the hint is a
+  // "did you mean" appended to the message, nothing else changes.
+  const r = run(
+    goodChange({
+      "specs/data-export/spec.md": GOOD_SPEC.replace("#### Scenario: Successful export", "#### Scenario: Export succeeds"),
+    })
+  );
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 1 "Covers: Successful export" names no scenario found in specs\/\*\* - closest scenario: "Export succeeds" \(renamed\?\)/);
+  assert.match(r.out, /Shape \/ Seams "Covers: Successful export" names no requirement or scenario found in specs\/\*\* - closest: "Export succeeds" \(renamed\?\)/);
+});
+
+test("FIXED: an unrelated Covers name gets no closest-match hint", () => {
+  const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: none", "Covers: Imaginary scenario") }));
+  assert.strictEqual(r.code, 1);
+  assert.match(r.out, /group 2 "Covers: Imaginary scenario" names no scenario/);
+  assert.doesNotMatch(r.out, /closest/);
+});
+
 test("a group with no Covers line is an ERROR", () => {
   const r = run(goodChange({ "tasks.md": GOOD_TASKS.replace("Covers: none\n\n", "") }));
   assert.strictEqual(r.code, 1);

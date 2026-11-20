@@ -441,7 +441,8 @@ function lintDesign(file, text, specCoversNames) {
         (s) => s.toLowerCase() === c.toLowerCase() || s.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(s.toLowerCase())
       );
       if (!hit) {
-        err(file, 0, `Shape / Seams "Covers: ${c}" names no requirement or scenario found in specs/**`);
+        const near = closestName(c, specCoversNames);
+        err(file, 0, `Shape / Seams "Covers: ${c}" names no requirement or scenario found in specs/**${near ? ` - closest: "${near}" (renamed?)` : ""}`);
       }
     }
     if (coversInDesign.length === 0 && /\(.*\):/.test(seams)) {
@@ -601,6 +602,50 @@ function lintTaskGraph(file, text) {
   }
 }
 
+// "Did you mean" support for unmatched Covers: names. Fuzzy on purpose - it
+// only decorates an error message; matching itself stays exact (that exactness
+// is what makes the lint deterministic). A candidate qualifies when it shares
+// a significant word (the rename case: same words, different order) or is
+// edit-close (the typo case). Candidates rank by Jaccard similarity over
+// significant words, so "Export succeeds" beats "User can export data" for a
+// renamed "Successful export" - shared words count, extra unrelated words
+// count against; spelling closeness only breaks ties. Returns "" when nothing
+// is close enough, so an unrelated name never gets a bogus suggestion.
+function closestName(name, candidates) {
+  const words = (s) => s.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 4);
+  const target = words(name);
+  let best = "";
+  let bestScore = 0;
+  for (const c of candidates) {
+    if (c.toLowerCase() === name.toLowerCase()) continue;
+    const cw = words(c);
+    const shared = target.filter((w) => cw.includes(w)).length;
+    const jaccard = shared / new Set([...target, ...cw]).size;
+    const sim = 1 - levenshtein(name.toLowerCase(), c.toLowerCase()) / Math.max(name.length, c.length);
+    if (jaccard === 0 && sim < 0.6) continue;
+    const score = jaccard * 10 + sim;
+    if (score > bestScore) {
+      bestScore = score;
+      best = c;
+    }
+  }
+  return best;
+}
+
+function levenshtein(a, b) {
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return row[b.length];
+}
+
 // Coverage: each group states "Covers: <scenario>; <scenario>" (or "Covers: none"
 // for a structure-only group: prefactor, expand/migrate/contract) before its first
 // checkbox. Checked in both directions: every scenario in specs/** is covered by
@@ -656,7 +701,10 @@ function lintTaskCoverage(file, text, scenarios, threatIds) {
           if (!g.security) err(file, g.line, `group ${g.id} covers threat ${id} but has no task tagged [security] - add the task that implements or runs its mitigation check`);
         }
       } else if (byName.has(name.toLowerCase())) covered.add(name.toLowerCase());
-      else err(file, g.line, `group ${g.id} "Covers: ${name}" names no scenario found in specs/**`);
+      else {
+        const near = closestName(name, scenarios.map((s) => s.name));
+        err(file, g.line, `group ${g.id} "Covers: ${name}" names no scenario found in specs/**${near ? ` - closest scenario: "${near}" (renamed?)` : ""}`);
+      }
     }
   }
   if (groups.length) {
