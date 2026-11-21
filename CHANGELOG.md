@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (schema v19)
+## 2026.11.21 — 2026-11-21 (schema v19)
 
 `apply` follows mattpocock's `implement` (one context, scoped tests) rather than `implement-spec` (parallel worktrees), the task-group graph is required, and `apply` keeps a log for retrospectives. From a comparison with mattpocock's `to-tickets`, `implement` and `implement-spec` and a count of 257 `tasks.md` files in 20 downstream repositories (`docs/research/2026-11-20-apply-parallelism-and-mattpocock-implement.md`). Not yet exercised on a real change.
 
@@ -10,6 +10,7 @@
 - **Dismissed opengrep candidates are recorded, not just counted.** The Phase 2 review report lists every dismissed candidate as one `file:line — reason` line (the reason the dismissal rule already required), and `retro-log.md`'s `## Phase 2 - Review` carries those lines next to the tally, or `- Dismissed: none` when every candidate was kept. Before, the log held only the counts: a user reading it could see candidates were dismissed but never which or why — and a dismissal is a security judgement the reviewing agent makes alone. Nothing else changes: a dismissal still never blocks, nothing lints the log, and a change already in progress can add the lines to its log by hand.
 - **Not adopted:** worktrees per group (`implement-spec`). Each worktree needs its own test environment (for Odoo, one container and one database copy each), more than a typical laptop carries.
 - **Dark mode removed.** The three `hrt-dark-mode-*` skills (`hrt-dark-mode-opt-in`, `hrt-dark-mode-decision-gate`, `hrt-dark-mode-routing`), `templates/dark.md`, every routing pointer, and every "even in dark mode" clause are gone. No rule changed: everything dark mode routed already went to the user. The +implementation extras are gone with it: PHASE 1 as one orchestrator subagent, `dark.md` presented as a second closing review before commit, and planning-only `apply` stopping at the door; `apply` now always runs PHASE 0 and always asks the parallel-start question (dark `+implementation` previously ran in order without asking). Downstream: delete the installed `.agents/skills/hrt-dark-mode-*` copies; a leftover `dark.md` in a change folder is inert and is archived with the change; re-check any finding that dark mode auto-resolved, because no human reviewed it. The schema version is unchanged.
+- **Vendored `mattpocock/skills` refreshed to `abeeaf956`** (`grilling`, `tdd`, `diagnosing-bugs`, `research`). Only two wording changes in file contents: `grilling` and `research` now tell the agent to start the sub-agent with a fresh context window. `tdd` and `diagnosing-bugs` changed only in their pinned commit.
 
 ## 2026.11.17 — 2026-11-17 (schema v18)
 
