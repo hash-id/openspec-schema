@@ -72,9 +72,45 @@ openspec instructions align   --change <name>
 openspec instructions apply   --change <name>
 ```
 
-**Security.** `specs` and `design` run a short plan-time security pass (`hrt-security-pass`) only when a change touches a trust boundary, using the OWASP Top 10 list that matches what the change touches (web, API, mobile, LLM, agent, machine identities) plus the MITRE CWE Top 25. `apply` reuses the same lists on the changed code. Changes to money, stock, quantity, limits, or multi-step state flows also get a list of business-flow abuse questions (`business-flow.md`). `apply` runs whatever security commands your repo already has (scripts, pre-commit, CI, scanner configs), scoped to the diff. Adding or upgrading a third-party package also fires the pass, with questions on dependency confusion, typosquatting, install scripts, and the lockfile diff (OWASP CICD-SEC-3). `apply`'s review also runs a bundled floor guard over the diff, which flags new suppression comments (`# nosec`, `@ts-ignore`, ...), added skips, deleted tests, fewer assertions, and stubs, so a check is never silenced to get to green without you deciding. `tempa-spec` installs no scanner, but it requires one: [opengrep](https://github.com/opengrep/opengrep). Whenever a change touches Python or JavaScript/TypeScript files (or Odoo XML), the review runs a small set of rules of our own over the diff (Python, JavaScript/TypeScript, and Odoo). If the `opengrep` command is missing or disabled, the review does not finish: the change stays a release blocker until it is installed. There is no skip and no waiver. Install it yourself; the installer does not. If you have no other scanner, two language-agnostic, permissively licensed starting points are [gitleaks](https://github.com/gitleaks/gitleaks) (secrets) and [osv-scanner](https://github.com/google/osv-scanner) (vulnerable dependencies); add a SAST tool for your language on top.
+## Security
 
-**Installing opengrep.** Releases are on the [releases page](https://github.com/opengrep/opengrep/releases) and are signed with Cosign; prefer a pinned version over `latest`. The project's own quick installs are `curl -fsSL https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh | bash` (Linux, macOS) and `irm https://raw.githubusercontent.com/opengrep/opengrep/main/install.ps1 | iex` (Windows PowerShell, with `-Version` to pin). They run a script from the network, so read it first if your policy asks for that. The bundled rules passed their tests on versions 1.11.1 and 1.32.0. The rules are local files and the scan fetches nothing.
+Security checks run in two places: at plan time (`specs`, `design`) and on the code (`apply`).
+
+### At plan time
+
+`specs` and `design` run a short security pass (`hrt-security-pass`), but only when a change touches a trust boundary.
+
+- **Lists:** the OWASP Top 10 that matches what the change touches (web, API, mobile, LLM, agent, machine identities), plus the MITRE CWE Top 25.
+- **Money, stock, quantity, limits, multi-step state flows:** also a list of business-flow abuse questions (`business-flow.md`).
+- **New or upgraded third-party package:** also fires the pass, with questions on dependency confusion, typosquatting, install scripts, and the lockfile diff (OWASP CICD-SEC-3).
+
+### On the code (`apply`)
+
+`apply` reuses the same lists on the changed code, and adds three mechanical checks:
+
+- **Your repo's own commands.** Whatever security commands the repo already has (scripts, pre-commit, CI, scanner configs), scoped to the diff.
+- **Floor guard.** A bundled script over the diff that flags new suppression comments (`# nosec`, `@ts-ignore`, ...), added skips, deleted tests, fewer assertions, and stubs, so a check is never silenced to get to green without you deciding.
+- **opengrep rules.** A small set of rules of our own (Python, JavaScript/TypeScript, and Odoo), run whenever a change touches Python or JavaScript/TypeScript files (or Odoo XML).
+
+### opengrep is required
+
+`tempa-spec` installs no scanner, but it requires [opengrep](https://github.com/opengrep/opengrep). If the `opengrep` command is missing or disabled, the review does not finish: the change stays a release blocker until it is installed. There is no skip and no waiver. Install it yourself; the installer does not.
+
+If you have no other scanner, two language-agnostic, permissively licensed starting points are [gitleaks](https://github.com/gitleaks/gitleaks) (secrets) and [osv-scanner](https://github.com/google/osv-scanner) (vulnerable dependencies); add a SAST tool for your language on top.
+
+#### Installing opengrep
+
+Releases are on the [releases page](https://github.com/opengrep/opengrep/releases) and are signed with Cosign; prefer a pinned version over `latest`. The project's own quick installs:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh | bash   # Linux, macOS
+```
+
+```powershell
+irm https://raw.githubusercontent.com/opengrep/opengrep/main/install.ps1 | iex          # Windows (use -Version to pin)
+```
+
+They run a script from the network, so read it first if your policy asks for that. The bundled rules passed their tests on versions 1.11.1 and 1.32.0. The rules are local files and the scan fetches nothing.
 
 ## Layout
 
